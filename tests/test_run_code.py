@@ -54,6 +54,13 @@ class RunCodeEndpointTests(unittest.TestCase):
         self.assertIn("data-open-request", page_html)
         self.assertIn("Request a professional lesson", page_html)
 
+    def test_homepage_loads_shared_lesson_request_script(self):
+        response = self.client.get("/")
+        page_html = response.get_data(as_text=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('src="static/lesson-request-inline.js"', page_html)
+
     def test_password_reset_flow_redirects_to_real_recovery_page(self):
         response = self.client.get("/")
         page_html = response.get_data(as_text=True)
