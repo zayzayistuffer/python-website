@@ -1,23 +1,55 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bots</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Python in Practice bots and community tools.">
+    <title>Bots | Python in Practice</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
-    <h1>Bots</h1>
-    <p>Welcome to the Bots page! Here is a list of discord bots available:</p>
-    <p><a href="https://code.pip.abrdns.com/request-lesson">Request lesson</a></p>
-    <ul>
-        <li>Bot 1</li>
-        <li>Bot 2</li>
-        <li>Bot 3</li>
-    </ul>
+    <div class="page-shell">
+        <header class="site-header">
+            <a class="brand-lockup" href="index.html#top" aria-label="Python in Practice home"><img src="https://www.python.org/static/community_logos/python-logo.png" alt="Python logo"><span>Python in Practice</span></a>
+            <nav class="site-nav" aria-label="Main navigation">
+                <a href="workbench.html">Workbench</a>
+                <a href="lessons.html">Lessons</a>
+                <a href="https://code.pip.abrdns.com/templates/discord.html">Discord</a>
+                <a class="nav-request" href="https://code.pip.abrdns.com/request-lesson">Request lesson</a>
+                <a href="index.html#principles">Principles</a>
+                <a href="index.html#field-notes">Field notes</a>
+            </nav>
+            <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">Menu <span>+</span></button>
+        </header>
+        <main class="bots-page">
+            <section class="bots-intro">
+                <div>
+                    <p class="eyebrow"><span class="eyebrow-dot"></span> Community tools</p>
+                    <h1>Small bots.<br><i>Useful company.</i></h1>
+                </div>
+                <p>Practical helpers for learning, sharing progress, and keeping the Python community moving.</p>
+            </section>
+            <section class="bot-grid" aria-label="Available bots">
+                <article class="bot-card bot-card-teal"><span class="bot-index">01 / COMMUNITY</span><h2>Welcome bot</h2><p>Greets new members and points them toward the first useful place to start.</p><a href="https://code.pip.abrdns.com/templates/discord.html">Visit Discord <span aria-hidden="true">↗</span></a></article>
+                <article class="bot-card bot-card-lavender"><span class="bot-index">02 / LEARNING</span><h2>Lesson guide</h2><p>Helps turn a question, a blocker, or a half-formed idea into a focused lesson request.</p><a href="https://code.pip.abrdns.com/request-lesson">Request a lesson <span aria-hidden="true">↗</span></a></article>
+                <article class="bot-card bot-card-orange"><span class="bot-index">03 / SUPPORT</span><h2>Helper desk</h2><p>Connects learners with people who can offer practical guidance when code gets stubborn.</p><a href="https://code.pip.abrdns.com/templates/discord.html">Join the community <span aria-hidden="true">↗</span></a></article>
+            </section>
+        </main>
+        <footer class="site-footer"><span>© 2026 Python in Practice</span><a href="index.html#top">Back to home ↑</a></footer>
+    </div>
+    <script>
+        const menu = document.querySelector('.menu-toggle');
+        const nav = document.querySelector('.site-nav');
+        menu.addEventListener('click', () => {
+            const open = menu.getAttribute('aria-expanded') === 'true';
+            menu.setAttribute('aria-expanded', String(!open));
+            nav.classList.toggle('is-open', !open);
+        });
+    </script>
 </body>
 </html>
-
-<button>Bot 1</button>
-<button>Bot 2</button>
-<button>Bot 3</button>
 

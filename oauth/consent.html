@@ -1,22 +1,33 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OAuth Consent</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Review Python in Practice account permissions.">
+    <title>Authorize | Python in Practice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/styles.css">
 </head>
-<body>
-    <h1>OAuth Consent</h1>
-    <p>You are about to grant the following permissions:</p>
-    <ul>
-        <li>View your profile information</li>
-        <li>Access your email address</li>
-    </ul>
-    <form action="/oauth/authorize" method="post">
-        <input type="hidden" name="client_id" value="your_client_id">
-        <input type="hidden" name="redirect_uri" value="your_redirect_uri">
-        <input type="hidden" name="response_type" value="code">
-        <button type="submit">Accept</button>
-    </form>
+<body class="oauth-page">
+    <main class="oauth-shell">
+        <section class="oauth-card" aria-labelledby="oauth-title">
+            <p class="eyebrow"><span class="eyebrow-dot"></span> Account connection</p>
+            <h1 id="oauth-title">Let Python in Practice<br><i>know you.</i></h1>
+            <p class="oauth-copy">Review the information this connection can use before you continue.</p>
+            <ul class="oauth-permissions">
+                <li><span aria-hidden="true">01</span><div><strong>Profile information</strong><small>Use your basic profile to personalize your workspace.</small></div></li>
+                <li><span aria-hidden="true">02</span><div><strong>Email address</strong><small>Use your email to keep your account connected.</small></div></li>
+            </ul>
+            <form class="oauth-actions" action="/oauth/authorize" method="post">
+                <input type="hidden" name="client_id" value="your_client_id">
+                <input type="hidden" name="redirect_uri" value="your_redirect_uri">
+                <input type="hidden" name="response_type" value="code">
+                <button class="oauth-accept" type="submit">Accept connection <span aria-hidden="true">↗</span></button>
+                <a class="oauth-cancel" href="/">Cancel</a>
+            </form>
+        </section>
+    </main>
 </body>
 </html>
