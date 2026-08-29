@@ -48,7 +48,6 @@
         <label for="auth-password">Password</label>
         <input id="auth-password" type="password" required minlength="8" autocomplete="current-password">
         <div class="auth-links">
-          <button class="auth-reset-button" id="auth-reset-button" type="button">Reset password</button>
           <button class="auth-reset-link" id="auth-reset-link" type="button">Forgot your password?</button>
         </div>
         <div class="auth-captcha" id="auth-captcha" aria-live="polite">
@@ -279,7 +278,6 @@
     document.querySelector('#auth-close').addEventListener('click', hideAuth);
     document.querySelector('#auth-switch').addEventListener('click', () => showAuth(authMode === 'login' ? 'register' : 'login'));
     document.querySelector('#auth-switch-login').addEventListener('click', () => showAuth('login'));
-    document.querySelector('#auth-reset-button').addEventListener('click', requestPasswordReset);
     document.querySelector('#auth-reset-link').addEventListener('click', requestPasswordReset);
     authPanel.addEventListener('click', (event) => { if (event.target === authPanel) hideAuth(); });
     authForm.addEventListener('submit', submitAuth);

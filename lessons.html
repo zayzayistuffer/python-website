@@ -56,34 +56,6 @@
     <footer class="site-footer"><span>© 2026 Python in Practice</span><a href="index.html#top">Back to home ↑</a></footer>
   </div>
   <script src="static/lessons.js"></script>
-  <script type="application/legacy-javascript">
-    const topicSets = {
-      Beginner: ['Variables and values', 'Strings and text', 'Numbers and arithmetic', 'Conditions and decisions', 'Loops and repetition', 'Functions and arguments', 'Lists and sequences', 'Dictionaries and records'],
-      Core: ['Files and paths', 'Errors and debugging', 'Modules and imports', 'Classes and objects', 'Testing with pytest', 'Data validation', 'Comprehensions', 'Command-line tools'],
-      Intermediate: ['Decorators and closures', 'Generators and iterators', 'Type hints', 'Dataclasses', 'Async programming', 'APIs and JSON', 'SQL with Python', 'Performance basics'],
-      Advanced: ['Concurrency patterns', 'Packaging projects', 'Security essentials', 'Architecture', 'Protocols and descriptors', 'Profiling and optimization', 'Deployment', 'Reliable services']
-    };
-    const actions = ['Read values from', 'Build a small tool with', 'Debug a real example using', 'Refactor a script with', 'Practice a pattern for', 'Design a clean solution with'];
-    const lessons = [];
-    Object.entries(topicSets).forEach(([level, topics], levelIndex) => topics.forEach((topic, topicIndex) => actions.forEach((action, actionIndex) => {
-      for (let variation = 0; variation < 6; variation += 1) lessons.push({ level, topic, title: `${action} ${topic.toLowerCase()}`, detail: `A focused exercise ${variation + 1} for turning ${topic.toLowerCase()} into dependable Python.`, order: levelIndex * 288 + topicIndex * 36 + actionIndex * 6 + variation + 1 });
-    })));
-    const search = document.querySelector('#lesson-search');
-    const level = document.querySelector('#lesson-level');
-    const topic = document.querySelector('#lesson-topic');
-    const grid = document.querySelector('#lesson-grid');
-    const count = document.querySelector('#lesson-count');
-    const pagination = document.querySelector('#lesson-pagination');
-    const pageSize = 24;
-    let page = 1;
-    [...new Set(lessons.map((lesson) => lesson.topic))].sort().forEach((name) => topic.insertAdjacentHTML('beforeend', `<option>${name}</option>`));
-    function filteredLessons() { const query = search.value.trim().toLowerCase(); return lessons.filter((lesson) => (level.value === 'all' || lesson.level === level.value) && (topic.value === 'all' || lesson.topic === topic.value) && (!query || `${lesson.title} ${lesson.detail} ${lesson.level}`.toLowerCase().includes(query))); }
-    function render() { const results = filteredLessons(); const pages = Math.max(1, Math.ceil(results.length / pageSize)); page = Math.min(page, pages); const visible = results.slice((page - 1) * pageSize, page * pageSize); count.textContent = `${results.length.toLocaleString()} lessons · page ${page} of ${pages}`; grid.innerHTML = visible.map((lesson) => `<article class="lesson-card"><span class="lesson-number">${String(lesson.order).padStart(4, '0')}</span><h2>${lesson.title}</h2><p>${lesson.detail}</p><div class="lesson-meta"><span>${lesson.level}</span><span>${lesson.topic}</span></div></article>`).join(''); pagination.innerHTML = `<button type="button" data-page="${page - 1}" ${page === 1 ? 'disabled' : ''} aria-label="Previous page">←</button><span class="lesson-page-label">${page} / ${pages}</span><button type="button" data-page="${page + 1}" ${page === pages ? 'disabled' : ''} aria-label="Next page">→</button>`; }
-    [search, level, topic].forEach((control) => control.addEventListener('input', () => { page = 1; render(); }));
-    pagination.addEventListener('click', (event) => { const nextPage = Number(event.target.dataset.page); if (nextPage) { page = nextPage; render(); window.scrollTo({ top: document.querySelector('.lesson-toolbar').offsetTop - 30, behavior: 'smooth' }); } });
-    const menu = document.querySelector('.menu-toggle'); const nav = document.querySelector('.site-nav'); menu.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') === 'true'; menu.setAttribute('aria-expanded', String(!open)); nav.classList.toggle('is-open', !open); });
-    render();
-  </script>
   <script src="static/lesson-request-inline.js"></script>
 </body>
 </html>

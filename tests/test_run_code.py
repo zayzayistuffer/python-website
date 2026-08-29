@@ -41,9 +41,9 @@ class RunCodeEndpointTests(unittest.TestCase):
         page_html = response.get_data(as_text=True)
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Reset password", page_html)
+        self.assertNotIn("Reset password", page_html)
         self.assertIn("Forgot your password", page_html)
-        self.assertIn("auth-reset-button", page_html)
+        self.assertNotIn("auth-reset-button", page_html)
         self.assertIn("auth-reset-link", page_html)
 
     def test_homepage_has_discord_lesson_request_button(self):
@@ -60,6 +60,15 @@ class RunCodeEndpointTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('src="static/lesson-request-inline.js"', page_html)
+
+    def test_shared_lesson_request_script_supports_fallback_trigger_ids(self):
+        script_path = app_module.app.root_path + "/static/lesson-request-inline.js"
+        with open(script_path, "r", encoding="utf-8") as fh:
+            script_text = fh.read()
+
+        self.assertIn("data-open-request", script_text)
+        self.assertIn("open-lesson-modal", script_text)
+        self.assertIn("open-request-modal", script_text)
 
     def test_password_reset_flow_redirects_to_real_recovery_page(self):
         response = self.client.get("/")
@@ -166,6 +175,15 @@ class RunCodeEndpointTests(unittest.TestCase):
         self.assertEqual(payload["embeds"][0]["title"], "Professional lesson request")
         self.assertEqual(payload["embeds"][0]["fields"][0]["value"], "learner")
         self.assertEqual(payload["embeds"][0]["fields"][3]["value"], "Build a small API")
+
+    def test_lessons_page_uses_curriculum_script_not_placeholder_generator(self):
+        response = self.client.get("/lessons.html")
+        page_html = response.get_data(as_text=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('src="static/lessons.js"', page_html)
+        self.assertNotIn("const topicSets =", page_html)
+        self.assertNotIn("Read values from", page_html)
 
     def test_template_paths_redirect_to_top_level_pages(self):
         response = self.client.get("/templates/discord.html")

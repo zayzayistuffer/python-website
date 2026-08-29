@@ -1,8 +1,5 @@
 (function () {
-  const triggers = document.querySelectorAll('[data-open-request]');
-  if (!triggers.length) return;
-
-  const existingModal = document.getElementById('request-lesson-modal');
+  const existingModal = document.getElementById('request-lesson-modal') || document.getElementById('lesson-modal');
   const modal = existingModal || document.createElement('dialog');
 
   if (!existingModal) {
@@ -14,11 +11,15 @@
   }
 
   const openRequestModal = () => {
-    if (!modal.open) modal.showModal();
+    if (modal && !modal.open) modal.showModal();
   };
 
-  modal.querySelector('.lesson-close')?.addEventListener('click', () => modal.close());
-  modal.addEventListener('click', (event) => { if (event.target === modal) modal.close(); });
+  const closeRequestModal = () => {
+    if (modal && modal.open) modal.close();
+  };
+
+  modal.querySelector('.lesson-close')?.addEventListener('click', closeRequestModal);
+  modal.addEventListener('click', (event) => { if (event.target === modal) closeRequestModal(); });
   modal.addEventListener('close', () => {
     if (!existingModal && modal.parentNode) modal.remove();
   });
@@ -64,5 +65,15 @@
     if (result.ok) form.reset();
   });
 
-  triggers.forEach((trigger) => trigger.addEventListener('click', openRequestModal));
+  const triggerSelectors = [
+    '[data-open-request]',
+    '#open-lesson-modal',
+    '#open-lesson-modal-hero',
+    '#open-request-modal',
+  ];
+
+  triggerSelectors.forEach((selector) => {
+    const nodes = document.querySelectorAll(selector);
+    nodes.forEach((trigger) => trigger.addEventListener('click', openRequestModal));
+  });
 })();
