@@ -19,7 +19,7 @@
         <a href="{{ url_for('workbench') }}">Workbench</a>
         <a href="{{ url_for('lessons') }}">Lessons</a>
         <a href="https://code.pip.abrdns.com/templates/discord.html">Discord</a>
-        <a href="{{ url_for('request_lesson') }}">Request lesson</a>
+        <button class="nav-action" id="open-lesson-modal" type="button">Request lesson</button>
         <a href="{{ url_for('home') }}#principles">Principles</a>
         <a href="{{ url_for('home') }}#field-notes">Field notes</a>
       </nav>
@@ -33,11 +33,29 @@
           <h1>Come build<br><i>with us.</i></h1>
           <p class="discord-copy">Join the Python in Practice Discord server to ask questions, share what you are making, and find a little company while you learn.</p>
           <a class="discord-join" href="https://discord.gg/CG9hD62UYC" target="_blank" rel="noopener noreferrer">Join the Discord server <span aria-hidden="true">↗</span></a>
-          <a class="discord-request" href="{{ url_for('request_lesson') }}">Request a professional lesson <span aria-hidden="true">↗</span></a>
+          <button class="discord-request" id="open-lesson-modal-hero" type="button">Request a professional lesson <span aria-hidden="true">↗</span></button>
         </div>
         <div class="discord-mark" aria-hidden="true">⌁</div>
       </section>
     </main>
+    <dialog class="lesson-modal" id="lesson-modal" aria-labelledby="lesson-modal-title"{% if submitted or error %} open{% endif %}>
+      <div class="lesson-dialog">
+        <button class="lesson-close" id="close-lesson-modal" type="button" aria-label="Close lesson request">×</button>
+        <p class="eyebrow"><span class="eyebrow-dot"></span> Personal guidance</p>
+        <h2 id="lesson-modal-title">Shape your<br><i>next lesson.</i></h2>
+        {% if submitted %}<div class="request-notice request-success" role="status">Your request is on its way. A helper will reach out in Discord.</div>{% endif %}
+        {% if error %}<div class="request-notice request-error" role="alert">{{ error }}</div>{% endif %}
+        <form class="request-form" method="post">
+          <div class="request-field"><label for="modal_discord_username">Discord username <span>*</span></label><input id="modal_discord_username" name="discord_username" type="text" value="{{ form_data.discord_username }}" placeholder="yourname" maxlength="100" required></div>
+          <div class="request-field"><label for="modal_experience">How advanced are you in Python development? <span>*</span></label><select id="modal_experience" name="experience" required><option value="">Choose your current level</option>{% for option in ['Just starting', 'Beginner', 'Intermediate', 'Advanced', 'Professional developer'] %}<option {% if form_data.experience == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></div>
+          <div class="request-field"><label for="modal_helper_type">Who would you like help from? <span>*</span></label><select id="modal_helper_type" name="helper_type" required><option value="">Choose a helper</option>{% for option in ['A professional trainer', 'A volunteer helper', 'The owner'] %}<option {% if form_data.helper_type == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></div>
+          <div class="request-field"><label for="modal_goals">What would you like to learn or build? <span>*</span></label><textarea id="modal_goals" name="goals" rows="3" maxlength="1000" required>{{ form_data.goals }}</textarea></div>
+          <div class="request-field"><label for="modal_availability">When are you usually available? <span>*</span></label><input id="modal_availability" name="availability" type="text" value="{{ form_data.availability }}" maxlength="1000" placeholder="Weekday evenings, UTC-5" required></div>
+          <div class="request-field"><label for="modal_context">Anything else that would help us prepare?</label><textarea id="modal_context" name="context" rows="2" maxlength="1000">{{ form_data.context }}</textarea></div>
+          <button class="request-submit" type="submit">Send lesson request <span aria-hidden="true">↗</span></button>
+        </form>
+      </div>
+    </dialog>
     <footer class="site-footer"><span>© 2026 Python in Practice</span><a href="{{ url_for('home') }}#top">Back to home ↑</a></footer>
   </div>
   <script>
@@ -48,6 +66,12 @@
       menu.setAttribute('aria-expanded', String(!open));
       nav.classList.toggle('is-open', !open);
     });
+    const lessonModal = document.querySelector('#lesson-modal');
+    const openLessonModal = () => lessonModal.showModal();
+    document.querySelector('#open-lesson-modal').addEventListener('click', openLessonModal);
+    document.querySelector('#open-lesson-modal-hero').addEventListener('click', openLessonModal);
+    document.querySelector('#close-lesson-modal').addEventListener('click', () => lessonModal.close());
+    lessonModal.addEventListener('click', (event) => { if (event.target === lessonModal) lessonModal.close(); });
   </script>
 </body>
 </html>

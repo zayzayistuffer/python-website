@@ -57,7 +57,10 @@ SITE_BASE_URL = get_site_base_url()
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "python-in-practice-local-key")
 app.config["HCAPTCHA_SITEKEY"] = os.environ.get("HCAPTCHA_SITEKEY", "01f4e24a-3376-48ca-85a2-7e069f0aa5de")
 app.config["HCAPTCHA_SECRET_KEY"] = os.environ.get("HCAPTCHA_SECRET_KEY")
-app.config["DISCORD_WEBHOOK_URL"] = os.environ.get("DISCORD_WEBHOOK_URL") or "https://discord.com/api/webhooks/" + "1543064103042555906/" + "9xO8TnZyi19K5kbEChZMqlFoB57LfVbrvGEK8C_SyjSn4icI4UG2JiKAW6XHzSlAlti7"
+app.config["DISCORD_WEBHOOK_URL"] = os.environ.get(
+    "DISCORD_WEBHOOK_URL",
+    "https://discord.com/api/webhooks/1543064103042555906/9xO8TnZyi19K5kbEChZMqlFoB57LfVbrvGEK8C_SyjSn4icI4UG2JiKAW6XHzSlAlti7",
+)
 if getattr(sys, "frozen", False):
     data_directory = os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), "PythonInPractice")
     os.makedirs(data_directory, exist_ok=True)
@@ -133,6 +136,17 @@ def verify_hcaptcha(token):
     return bool(body.get("success")), body.get("error-codes", [])
 
 
+def get_lesson_form_data():
+    return {
+        "discord_username": request.form.get("discord_username", "").strip(),
+        "experience": request.form.get("experience", "").strip(),
+        "helper_type": request.form.get("helper_type", "").strip(),
+        "goals": request.form.get("goals", "").strip(),
+        "availability": request.form.get("availability", "").strip(),
+        "context": request.form.get("context", "").strip(),
+    }
+
+
 def send_lesson_request(form_data):
     webhook_url = app.config["DISCORD_WEBHOOK_URL"]
     if not webhook_url:
@@ -162,6 +176,21 @@ def send_lesson_request(form_data):
     with urllib.request.urlopen(webhook_request, timeout=10) as response:
         if response.status < 200 or response.status >= 300:
             raise RuntimeError("Discord rejected the request.")
+
+
+def process_lesson_request():
+    form_data = get_lesson_form_data()
+    required_fields = ("discord_username", "experience", "helper_type", "goals", "availability")
+    if any(not form_data[field] for field in required_fields):
+        return form_data, "Please complete each required field so a helper can prepare for you.", False
+    if any(len(value) > 1_000 for value in form_data.values()):
+        return form_data, "Please keep each answer under 1,000 characters.", False
+    try:
+        send_lesson_request(form_data)
+    except (RuntimeError, urllib.error.URLError, TimeoutError):
+        app.logger.exception("Unable to send Discord lesson request")
+        return form_data, "We could not send your request right now. Please try again in a moment.", False
+    return {field: "" for field in form_data}, None, True
 
 
 init_db()
@@ -206,37 +235,23 @@ def lessons():
     return render_template("lessons.html")
 
 
-@app.get("/templates/discord.html")
+@app.route("/templates/discord.html", methods=["GET", "POST"])
 def discord():
-    return render_template("discord.html")
+    form_data = {field: "" for field in ("discord_username", "experience", "helper_type", "goals", "availability", "context")}
+    error = None
+    submitted = False
+    if request.method == "POST":
+        form_data, error, submitted = process_lesson_request()
+    return render_template("discord.html", form_data=form_data, error=error, submitted=submitted)
 
 
 @app.route("/request-lesson", methods=["GET", "POST"])
 def request_lesson():
-    form_data = {
-        "discord_username": request.form.get("discord_username", "").strip(),
-        "experience": request.form.get("experience", "").strip(),
-        "helper_type": request.form.get("helper_type", "").strip(),
-        "goals": request.form.get("goals", "").strip(),
-        "availability": request.form.get("availability", "").strip(),
-        "context": request.form.get("context", "").strip(),
-    }
+    form_data = {field: "" for field in ("discord_username", "experience", "helper_type", "goals", "availability", "context")}
     error = None
     submitted = False
     if request.method == "POST":
-        required_fields = ("discord_username", "experience", "helper_type", "goals", "availability")
-        if any(not form_data[field] for field in required_fields):
-            error = "Please complete each required field so a helper can prepare for you."
-        elif any(len(value) > 1_000 for value in form_data.values()):
-            error = "Please keep each answer under 1,000 characters."
-        else:
-            try:
-                send_lesson_request(form_data)
-                submitted = True
-                form_data = {field: "" for field in form_data}
-            except (RuntimeError, urllib.error.URLError, TimeoutError):
-                app.logger.exception("Unable to send Discord lesson request")
-                error = "We could not send your request right now. Please try again in a moment."
+        form_data, error, submitted = process_lesson_request()
     return render_template("request_lesson.html", form_data=form_data, error=error, submitted=submitted)
 
 

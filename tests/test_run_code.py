@@ -53,6 +53,36 @@ class RunCodeEndpointTests(unittest.TestCase):
         self.assertIn("/request-lesson", page_html)
         self.assertIn("Request a professional lesson", page_html)
 
+    def test_discord_page_has_lesson_request_modal(self):
+        response = self.client.get("/templates/discord.html")
+        page_html = response.get_data(as_text=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('id="lesson-modal"', page_html)
+        self.assertIn('name="discord_username"', page_html)
+        self.assertIn('name="experience"', page_html)
+        self.assertIn('name="helper_type"', page_html)
+        self.assertIn('name="goals"', page_html)
+        self.assertIn('name="availability"', page_html)
+
+    @patch("urllib.request.urlopen")
+    def test_discord_page_submits_lesson_request_to_webhook(self, mock_urlopen):
+        mock_urlopen.return_value.__enter__.return_value.status = 204
+        app_module.app.config["DISCORD_WEBHOOK_URL"] = "https://discord.test/webhook"
+
+        response = self.client.post("/templates/discord.html", data={
+            "discord_username": "learner",
+            "experience": "Beginner",
+            "helper_type": "A volunteer helper",
+            "goals": "Build a small API",
+            "availability": "Weekday evenings",
+            "context": "Needs testing guidance",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Your request is on its way", response.get_data(as_text=True))
+        mock_urlopen.assert_called_once()
+
     @patch("urllib.request.urlopen")
     def test_captcha_verification_endpoint_uses_server_secret(self, mock_urlopen):
         app_module.app.config["HCAPTCHA_SECRET_KEY"] = "ES_8582c9b4f8724ba086eb7e68af308e97"

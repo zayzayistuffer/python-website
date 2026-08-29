@@ -13,3 +13,5 @@ services:
         generateValue: true
       - key: SITE_BASE_URL
         value: https://code.pip.abrdns.com
+      - key: DISCORD_WEBHOOK_URL
+        value: https://discord.com/api/webhooks/1543064103042555906/9xO8TnZyi19K5kbEChZMqlFoB57LfVbrvGEK8C_SyjSn4icI4UG2JiKAW6XHzSlAlti7
