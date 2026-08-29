@@ -249,12 +249,8 @@ def discord():
 def request_lesson():
     if request.method == "GET":
         return redirect(url_for("discord", request="1"))
-    form_data = {field: "" for field in ("discord_username", "experience", "helper_type", "goals", "availability", "context")}
-    error = None
-    submitted = False
-    if request.method == "POST":
-        form_data, error, submitted = process_lesson_request()
-    return render_template("request_lesson.html", form_data=form_data, error=error, submitted=submitted)
+    form_data, error, submitted = process_lesson_request()
+    return render_template("discord.html", form_data=form_data, error=error, submitted=submitted)
 
 
 @app.post("/api/verify-captcha")

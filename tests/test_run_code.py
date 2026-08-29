@@ -72,6 +72,26 @@ class RunCodeEndpointTests(unittest.TestCase):
         self.assertEqual(response.headers["Location"], "/templates/discord.html?request=1")
 
     @patch("urllib.request.urlopen")
+    def test_request_lesson_post_renders_discord_modal(self, mock_urlopen):
+        mock_urlopen.return_value.__enter__.return_value.status = 204
+        app_module.app.config["DISCORD_WEBHOOK_URL"] = "https://discord.test/webhook"
+
+        response = self.client.post("/request-lesson", data={
+            "discord_username": "learner",
+            "experience": "Beginner",
+            "helper_type": "A volunteer helper",
+            "goals": "Build a small API",
+            "availability": "Weekday evenings",
+            "context": "",
+        })
+
+        page_html = response.get_data(as_text=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('id="lesson-modal"', page_html)
+        self.assertIn("Your request is on its way", page_html)
+        mock_urlopen.assert_called_once()
+
+    @patch("urllib.request.urlopen")
     def test_discord_page_submits_lesson_request_to_webhook(self, mock_urlopen):
         mock_urlopen.return_value.__enter__.return_value.status = 204
         app_module.app.config["DISCORD_WEBHOOK_URL"] = "https://discord.test/webhook"
