@@ -206,7 +206,7 @@ def lessons():
     return render_template("lessons.html")
 
 
-@app.get("/discord")
+@app.get("/templates/discord.html")
 def discord():
     return render_template("discord.html")
 
@@ -372,5 +372,5 @@ def run_code():
 
 
 if __name__ == "__main__":
-    threading.Timer(1.25, lambda: webbrowser.open(SITE_BASE_URL)).start()
+    threading.Timer(1.25, lambda: webbrowser.open(f"{SITE_BASE_URL}/templates/discord.html")).start()
     app.run(debug=True)
