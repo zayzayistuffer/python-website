@@ -37,7 +37,7 @@
           body: JSON.stringify({ embeds: [embed] })
         });
         if (response.ok) {
-          result = { ok: true, message: 'Your request has been sent to Discord!' };
+          result = { ok: true, message: 'Your request has been sent to our team on discord! Please wait for a response from one of our team members in your dms.' };
         } else {
           result = { ok: false, error: 'Failed to send request. Please try again.' };
         }
