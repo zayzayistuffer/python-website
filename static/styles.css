@@ -1001,6 +1001,42 @@ h2 {
   background: rgba(255,255,255,0.72);
 }
 
+.auth-panel {
+  display: none;
+}
+
+.auth-panel.open {
+  display: block;
+}
+
+body.auth-required .page-shell > *:not(.auth-panel) {
+  display: none !important;
+}
+
+body.auth-required .auth-panel {
+  display: block;
+  width: min(100%, 560px);
+  margin: 72px auto 40px;
+}
+
+body.auth-required .site-header,
+body.auth-required main,
+body.auth-required .site-footer,
+body.auth-required .profile-modal,
+body.auth-required .auth-gate {
+  display: none !important;
+}
+
+body:not(.auth-required) .auth-panel {
+  display: none !important;
+}
+
+body.auth-required .auth-panel {
+  display: block;
+  width: min(100%, 560px);
+  margin: 72px auto 40px;
+}
+
 .auth-gate {
   display: none;
   margin-top: 20px;

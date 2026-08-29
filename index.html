@@ -133,7 +133,17 @@
     let currentUser = null;
     let authMode = 'login';
 
-    function unlockSite() { document.body.classList.remove('auth-required'); document.querySelector('#auth-gate').hidden = true; }
+    function unlockSite() {
+      document.body.classList.remove('auth-required');
+      authPanel.classList.remove('open');
+      document.querySelector('#auth-gate').hidden = true;
+    }
+
+    function ensureAuthVisible() {
+      document.body.classList.add('auth-required');
+      authPanel.classList.add('open');
+    }
+
     function showProfile() { document.querySelector('#profile-email').textContent = displayEmail(currentUser); document.querySelector('#profile-modal').classList.add('open'); }
 
     function isDiscordUser(user) {
@@ -157,6 +167,7 @@
 
     function showAuth(mode) {
       authMode = mode;
+      document.body.classList.add('auth-required');
       document.querySelectorAll('.auth-switch').forEach((button) => button.classList.toggle('active', button.dataset.mode === mode));
       authTitle.innerHTML = mode === 'login' ? 'Keep your work<br><i>close.</i>' : 'Make a home<br><i>for ideas.</i>';
       authSubmit.textContent = mode === 'login' ? 'Log in' : 'Create account';
@@ -237,11 +248,19 @@
     if (supabaseClient) {
       supabaseClient.auth.getUser().then(async ({ data }) => {
         currentUser = data.user;
-        if (currentUser && (!needsEmailConfirmation(currentUser) || currentUser.email_confirmed_at)) unlockSite(); else if (currentUser) { await supabaseClient.auth.signOut(); currentUser = null; }
+        if (currentUser && (!needsEmailConfirmation(currentUser) || currentUser.email_confirmed_at)) {
+          unlockSite();
+        } else {
+          if (currentUser) { await supabaseClient.auth.signOut(); currentUser = null; }
+          ensureAuthVisible();
+          showAuth('login');
+        }
         updateAuth();
       });
     } else {
       updateAuth();
+      ensureAuthVisible();
+      showAuth('login');
     }
   </script>
   <script>
