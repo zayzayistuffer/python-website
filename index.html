@@ -128,6 +128,7 @@
     const authMessage = document.querySelector('#auth-message');
     const authTitle = document.querySelector('#auth-title');
     const logoutButton = document.querySelector('#logout-button');
+    const isHomePage = () => ['/', '/index.html'].includes(window.location.pathname);
     const supabaseReady = window.supabase && !window.SUPABASE_URL.startsWith('YOUR_') && !window.SUPABASE_ANON_KEY.startsWith('YOUR_');
     const supabaseClient = supabaseReady ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
     let currentUser = null;
@@ -140,11 +141,20 @@
     }
 
     function ensureAuthVisible() {
-      document.body.classList.add('auth-required');
-      authPanel.classList.add('open');
+      if (isHomePage()) {
+        document.body.classList.add('auth-required');
+        authPanel.classList.add('open');
+      }
     }
 
     function showProfile() { document.querySelector('#profile-email').textContent = displayEmail(currentUser); document.querySelector('#profile-modal').classList.add('open'); }
+
+    function openAuthModal() {
+      if (!isHomePage()) return;
+      authPanel.classList.add('open');
+      document.body.classList.add('auth-required');
+      document.querySelector('#auth-email').focus();
+    }
 
     function isDiscordUser(user) {
       return user?.app_metadata?.provider === 'discord' || user?.identities?.some((identity) => identity.provider === 'discord');
@@ -167,7 +177,9 @@
 
     function showAuth(mode) {
       authMode = mode;
-      document.body.classList.add('auth-required');
+      if (isHomePage()) {
+        document.body.classList.add('auth-required');
+      }
       document.querySelectorAll('.auth-switch').forEach((button) => button.classList.toggle('active', button.dataset.mode === mode));
       authTitle.innerHTML = mode === 'login' ? 'Keep your work<br><i>close.</i>' : 'Make a home<br><i>for ideas.</i>';
       authSubmit.textContent = mode === 'login' ? 'Log in' : 'Create account';
@@ -283,15 +295,19 @@
           unlockSite();
         } else {
           if (currentUser) { await supabaseClient.auth.signOut(); currentUser = null; }
-          ensureAuthVisible();
-          showAuth('login');
+          if (isHomePage()) {
+            ensureAuthVisible();
+            showAuth('login');
+          }
         }
         updateAuth();
       });
     } else {
       updateAuth();
-      ensureAuthVisible();
-      showAuth('login');
+      if (isHomePage()) {
+        ensureAuthVisible();
+        showAuth('login');
+      }
     }
   </script>
   <script>
