@@ -60,7 +60,7 @@ class RunCodeEndpointTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('id="lesson-modal"', page_html)
-        self.assertIn('action="/request-lesson"', page_html)
+        self.assertIn('action="/templates/discord.html"', page_html)
         self.assertIn("if (!lessonModal.open) lessonModal.showModal()", page_html)
         self.assertIn('name="discord_username"', page_html)
         self.assertIn('name="experience"', page_html)
