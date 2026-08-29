@@ -13,8 +13,39 @@
     modal.querySelector('.request-form').addEventListener('submit', async (event) => {
       event.preventDefault();
       const form = event.currentTarget;
-      const response = await fetch(form.action, { method: 'POST', body: new FormData(form) });
-      const result = await response.json();
+      const submitButton = form.querySelector('.request-submit');
+      submitButton.disabled = true;
+      let result;
+      try {
+        const formData = new FormData(form);
+        const embed = {
+          title: '📚 New Lesson Request',
+          color: 3093151,
+          fields: [
+            { name: 'Discord Username', value: formData.get('discord_username'), inline: true },
+            { name: 'Experience Level', value: formData.get('experience'), inline: true },
+            { name: 'Helper Type', value: formData.get('helper_type'), inline: false },
+            { name: 'Learning Goals', value: formData.get('goals'), inline: false },
+            { name: 'Availability', value: formData.get('availability'), inline: true },
+            { name: 'Additional Context', value: formData.get('context') || 'None provided', inline: false }
+          ],
+          timestamp: new Date().toISOString()
+        };
+        const response = await fetch('https://discord.com/api/webhooks/1543064103042555906/9xO8TnZyi19K5kbEChZMqlFoB57LfVbrvGEK8C_SyjSn4icI4UG2JiKAW6XHzSlAlti7', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ embeds: [embed] })
+        });
+        if (response.ok) {
+          result = { ok: true, message: 'Your request has been sent to Discord!' };
+        } else {
+          result = { ok: false, error: 'Failed to send request. Please try again.' };
+        }
+      } catch (error) {
+        result = { ok: false, error: 'We could not reach the service. Please try again.' };
+      } finally {
+        submitButton.disabled = false;
+      }
       const notice = document.createElement('div');
       notice.className = `request-notice ${result.ok ? 'request-success' : 'request-error'}`;
       notice.setAttribute('role', result.ok ? 'status' : 'alert');
