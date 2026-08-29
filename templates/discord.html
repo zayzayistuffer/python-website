@@ -45,7 +45,7 @@
         <h2 id="lesson-modal-title">Shape your<br><i>next lesson.</i></h2>
         {% if submitted %}<div class="request-notice request-success" role="status">Your request is on its way. A helper will reach out in Discord.</div>{% endif %}
         {% if error %}<div class="request-notice request-error" role="alert">{{ error }}</div>{% endif %}
-        <form class="request-form" method="post" action="{{ url_for('discord') }}">
+        <form class="request-form" method="post" action="{{ url_for('lesson_request_api') }}">
           <div class="request-field"><label for="modal_discord_username">Discord username <span>*</span></label><input id="modal_discord_username" name="discord_username" type="text" value="{{ form_data.discord_username }}" placeholder="yourname" maxlength="100" required></div>
           <div class="request-field"><label for="modal_experience">How advanced are you in Python development? <span>*</span></label><select id="modal_experience" name="experience" required><option value="">Choose your current level</option>{% for option in ['Just starting', 'Beginner', 'Intermediate', 'Advanced', 'Professional developer'] %}<option {% if form_data.experience == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></div>
           <div class="request-field"><label for="modal_helper_type">Who would you like help from? <span>*</span></label><select id="modal_helper_type" name="helper_type" required><option value="">Choose a helper</option>{% for option in ['A professional trainer', 'A volunteer helper', 'The owner'] %}<option {% if form_data.helper_type == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></div>
@@ -73,6 +73,18 @@
     document.querySelector('#close-lesson-modal').addEventListener('click', () => lessonModal.close());
     lessonModal.addEventListener('click', (event) => { if (event.target === lessonModal) lessonModal.close(); });
     if (new URLSearchParams(window.location.search).get('request') === '1' || lessonModal.hasAttribute('open')) openLessonModal();
+    const requestForm = document.querySelector('.request-form');
+    requestForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const response = await fetch(requestForm.action, { method: 'POST', body: new FormData(requestForm) });
+      const result = await response.json();
+      const notice = document.createElement('div');
+      notice.className = `request-notice ${result.ok ? 'request-success' : 'request-error'}`;
+      notice.setAttribute('role', result.ok ? 'status' : 'alert');
+      notice.textContent = result.ok ? result.message : result.error;
+      requestForm.prepend(notice);
+      if (result.ok) requestForm.reset();
+    });
   </script>
 </body>
 </html>

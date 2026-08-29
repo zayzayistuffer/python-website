@@ -60,7 +60,7 @@ class RunCodeEndpointTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('id="lesson-modal"', page_html)
-        self.assertIn('action="/templates/discord.html"', page_html)
+        self.assertIn('action="/api/lesson-request"', page_html)
         self.assertIn("if (!lessonModal.open) lessonModal.showModal()", page_html)
         self.assertIn('name="discord_username"', page_html)
         self.assertIn('name="experience"', page_html)
@@ -116,6 +116,25 @@ class RunCodeEndpointTests(unittest.TestCase):
         self.assertEqual(webhook_request.full_url, "https://discord.test/webhook")
         self.assertEqual(payload["embeds"][0]["fields"][0]["value"], "learner")
         self.assertEqual(payload["embeds"][0]["fields"][5]["value"], "Needs testing guidance")
+
+    @patch("urllib.request.urlopen")
+    def test_lesson_request_api_returns_webhook_success_without_page_redirect(self, mock_urlopen):
+        mock_urlopen.return_value.__enter__.return_value.status = 204
+        app_module.app.config["DISCORD_WEBHOOK_URL"] = "https://discord.test/webhook"
+
+        response = self.client.post("/api/lesson-request", json={
+            "discord_username": "learner",
+            "experience": "Beginner",
+            "helper_type": "A volunteer helper",
+            "goals": "Build a small API",
+            "availability": "Weekday evenings",
+            "context": "",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.get_json()["ok"])
+        self.assertNotIn("templates/discord.html", response.get_data(as_text=True))
+        mock_urlopen.assert_called_once()
 
     @patch("urllib.request.urlopen")
     def test_captcha_verification_endpoint_uses_server_secret(self, mock_urlopen):

@@ -137,13 +137,14 @@ def verify_hcaptcha(token):
 
 
 def get_lesson_form_data():
+    submitted_data = request.form or request.get_json(silent=True) or {}
     return {
-        "discord_username": request.form.get("discord_username", "").strip(),
-        "experience": request.form.get("experience", "").strip(),
-        "helper_type": request.form.get("helper_type", "").strip(),
-        "goals": request.form.get("goals", "").strip(),
-        "availability": request.form.get("availability", "").strip(),
-        "context": request.form.get("context", "").strip(),
+        "discord_username": str(submitted_data.get("discord_username", "")).strip(),
+        "experience": str(submitted_data.get("experience", "")).strip(),
+        "helper_type": str(submitted_data.get("helper_type", "")).strip(),
+        "goals": str(submitted_data.get("goals", "")).strip(),
+        "availability": str(submitted_data.get("availability", "")).strip(),
+        "context": str(submitted_data.get("context", "")).strip(),
     }
 
 
@@ -263,6 +264,14 @@ def verify_captcha():
     if not is_valid:
         return jsonify(ok=False, error="Captcha verification failed.", details=details), 400
     return jsonify(ok=True)
+
+
+@app.post("/api/lesson-request")
+def lesson_request_api():
+    form_data, error, submitted = process_lesson_request()
+    if error:
+        return jsonify(ok=False, error=error), 400
+    return jsonify(ok=submitted, message="Your request is on its way. A helper will reach out in Discord.")
 
 
 @app.post("/api/auth/register")
