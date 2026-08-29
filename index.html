@@ -186,6 +186,35 @@
       authMessage.textContent = '';
     }
 
+    async function requestPasswordReset() {
+      const email = document.querySelector('#auth-email').value.trim();
+      if (!email) {
+        authMessage.textContent = 'Enter the email address for your account first.';
+        document.querySelector('#auth-email').focus();
+        return;
+      }
+      if (!supabaseClient) {
+        authMessage.textContent = 'Add your Supabase URL and anon key first.';
+        return;
+      }
+
+      authSubmit.disabled = true;
+      authMessage.textContent = 'Sending password reset email...';
+
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}${window.location.pathname}?reset=1`
+      });
+
+      authSubmit.disabled = false;
+
+      if (error) {
+        authMessage.textContent = error.message || 'Unable to send the password reset email.';
+        return;
+      }
+
+      authMessage.textContent = 'Password reset email sent. Check your inbox and follow the link to update your password.';
+    }
+
     async function submitAuth(event) {
       event.preventDefault();
       const email = document.querySelector('#auth-email').value.trim();
@@ -238,6 +267,8 @@
     document.querySelector('#auth-close').addEventListener('click', hideAuth);
     document.querySelector('#auth-switch').addEventListener('click', () => showAuth(authMode === 'login' ? 'register' : 'login'));
     document.querySelector('#auth-switch-login').addEventListener('click', () => showAuth('login'));
+    document.querySelector('#auth-reset-button').addEventListener('click', requestPasswordReset);
+    document.querySelector('#auth-reset-link').addEventListener('click', requestPasswordReset);
     authPanel.addEventListener('click', (event) => { if (event.target === authPanel) hideAuth(); });
     authForm.addEventListener('submit', submitAuth);
     document.querySelector('#profile-close').addEventListener('click', () => document.querySelector('#profile-modal').classList.remove('open'));
