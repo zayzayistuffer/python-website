@@ -51,7 +51,7 @@ class RunCodeEndpointTests(unittest.TestCase):
         page_html = response.get_data(as_text=True)
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("/request-lesson", page_html)
+        self.assertIn("data-open-request", page_html)
         self.assertIn("Request a professional lesson", page_html)
 
     def test_discord_page_has_lesson_request_modal(self):
