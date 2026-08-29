@@ -45,6 +45,14 @@ class RunCodeEndpointTests(unittest.TestCase):
         self.assertIn("auth-reset-button", page_html)
         self.assertIn("auth-reset-link", page_html)
 
+    def test_homepage_has_discord_lesson_request_button(self):
+        response = self.client.get("/")
+        page_html = response.get_data(as_text=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("/request-lesson", page_html)
+        self.assertIn("Request a professional lesson", page_html)
+
     @patch("urllib.request.urlopen")
     def test_captcha_verification_endpoint_uses_server_secret(self, mock_urlopen):
         app_module.app.config["HCAPTCHA_SECRET_KEY"] = "ES_8582c9b4f8724ba086eb7e68af308e97"
