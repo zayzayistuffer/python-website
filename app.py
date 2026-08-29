@@ -216,6 +216,11 @@ def index_page():
     return send_file("index.html")
 
 
+@app.get("/reset-password.html")
+def reset_password_page():
+    return send_file("reset-password.html")
+
+
 @app.get("/lessons.html")
 def lessons_page():
     return send_file("lessons.html")

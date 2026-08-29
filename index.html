@@ -214,7 +214,7 @@
       authMessage.textContent = 'Sending password reset email...';
 
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}${window.location.pathname}?reset=1`
+        redirectTo: `${window.location.origin}/reset-password.html`
       });
 
       authSubmit.disabled = false;

@@ -1,28 +1,30 @@
 :root {
-  --bg: #0b0f14;
-  --bg-strong: #111821;
-  --panel: rgba(17, 24, 33, 0.82);
-  --panel-strong: #121a24;
-  --panel-alt: #101820;
-  --ink: #edf1f7;
-  --muted: #a3adb9;
-  --line: rgba(195, 205, 218, 0.13);
-  --line-strong: rgba(195, 205, 218, 0.2);
-  --shadow: 0 22px 60px rgba(2, 6, 12, 0.52);
-  --shadow-soft: 0 12px 28px rgba(2, 6, 12, 0.26);
-  --brand: #b89b6d;
-  --brand-deep: #d6c199;
-  --brand-soft: rgba(184, 155, 109, 0.15);
-  --orange: #dca56d;
-  --orange-soft: rgba(220, 165, 109, 0.12);
-  --amber: #f1d7a0;
-  --red: #d77d6e;
-  --purple: #b7a0f2;
-  --purple-soft: rgba(183, 160, 242, 0.12);
+  --bg: #0a0f14;
+  --bg-strong: #111b25;
+  --panel: rgba(17, 24, 33, 0.9);
+  --panel-strong: #121d2a;
+  --panel-alt: #101a22;
+  --card: rgba(18, 27, 37, 0.92);
+  --card-soft: rgba(22, 33, 43, 0.9);
+  --ink: #f3f7ff;
+  --muted: #d1dae5;
+  --line: rgba(214, 224, 236, 0.18);
+  --line-strong: rgba(214, 224, 236, 0.28);
+  --shadow: 0 22px 60px rgba(2, 6, 12, 0.6);
+  --shadow-soft: 0 12px 28px rgba(2, 6, 12, 0.34);
+  --brand: #d4ae73;
+  --brand-deep: #f0d4a1;
+  --brand-soft: rgba(212, 174, 115, 0.18);
+  --orange: #f0b26d;
+  --orange-soft: rgba(240, 178, 109, 0.14);
+  --amber: #f8dfad;
+  --red: #ef8c7d;
+  --purple: #cab5ff;
+  --purple-soft: rgba(202, 181, 255, 0.14);
   --code-bg: #101722;
-  --code-text: #e8edf8;
-  --success: #8accaa;
-  --warning: #f0c686;
+  --code-text: #edf4ff;
+  --success: #8fe2b3;
+  --warning: #f7d39b;
   --max-width: 1240px;
 }
 
@@ -38,9 +40,9 @@ body {
   margin: 0;
   font-family: "Manrope", "Segoe UI", sans-serif;
   background:
-    radial-gradient(circle at top left, rgba(184, 155, 109, 0.14), transparent 20%),
-    radial-gradient(circle at right center, rgba(183, 160, 242, 0.12), transparent 20%),
-    linear-gradient(180deg, #0d1217 0%, var(--bg) 100%);
+    radial-gradient(circle at top left, rgba(212, 174, 115, 0.18), transparent 20%),
+    radial-gradient(circle at right center, rgba(202, 181, 255, 0.12), transparent 20%),
+    linear-gradient(180deg, #0c1118 0%, var(--bg) 100%);
   color: var(--ink);
   line-height: 1.6;
 }
@@ -85,7 +87,7 @@ button {
   padding: 18px 22px;
   border: 1px solid var(--line);
   border-radius: 22px;
-  background: rgba(17, 24, 33, 0.8);
+  background: rgba(16, 23, 32, 0.94);
   backdrop-filter: blur(12px);
   box-shadow: var(--shadow-soft);
 }
@@ -446,7 +448,7 @@ h2 {
   padding: 26px 26px 22px;
   border: 1px solid var(--line);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.32);
+  background: var(--card-soft);
   box-shadow: var(--shadow-soft);
 }
 
@@ -497,21 +499,21 @@ h2 {
   padding: 22px 22px 18px;
   border: 1px solid var(--line);
   border-radius: 26px;
-  background: rgba(255, 255, 255, 0.38);
+  background: var(--card-soft);
   box-shadow: var(--shadow-soft);
   overflow: hidden;
 }
 
 .note-feature {
-  background: linear-gradient(180deg, rgba(255,255,255,0.76), rgba(241,234,222,0.85));
+  background: linear-gradient(180deg, rgba(25, 34, 45, 0.96), rgba(18, 27, 35, 0.9));
 }
 
 .note-small {
-  background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(246,236,224,0.8));
+  background: linear-gradient(180deg, rgba(19, 28, 37, 0.94), rgba(15, 24, 31, 0.9));
 }
 
 .orange-card {
-  background: linear-gradient(180deg, rgba(249,228,212,0.95), rgba(243,214,185,0.68));
+  background: linear-gradient(180deg, rgba(42, 31, 22, 0.94), rgba(29, 22, 17, 0.88));
 }
 
 .note-meta {
@@ -575,7 +577,7 @@ h2 {
   padding: 30px 28px;
   border: 1px solid var(--line);
   border-radius: 30px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(242,235,223,0.86));
+  background: linear-gradient(135deg, rgba(17, 24, 31, 0.96), rgba(22, 33, 43, 0.94));
   box-shadow: var(--shadow-soft);
 }
 
@@ -597,7 +599,7 @@ h2 {
   padding: 8px 8px 8px 16px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.68);
+  background: rgba(13, 18, 24, 0.9);
 }
 
 .signup-form input {
@@ -673,7 +675,7 @@ h2 {
   padding: 0.9rem 1rem;
   border: 1px solid var(--line-strong);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(9, 15, 20, 0.9);
   color: var(--ink);
 }
 
@@ -695,7 +697,7 @@ h2 {
   padding: 20px 18px 18px;
   border: 1px solid var(--line);
   border-radius: 22px;
-  background: rgba(255,255,255,0.42);
+  background: var(--card-soft);
   box-shadow: var(--shadow-soft);
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
 }
@@ -803,9 +805,9 @@ h2 {
   overflow: auto;
   padding: 24px 24px 22px;
   border-radius: 30px;
-  background: #fffdf9;
-  border: 1px solid rgba(28, 27, 26, 0.08);
-  box-shadow: 0 28px 80px rgba(14, 13, 12, 0.22);
+  background: linear-gradient(180deg, rgba(18, 27, 36, 0.98), rgba(11, 17, 22, 0.96));
+  border: 1px solid var(--line);
+  box-shadow: 0 28px 80px rgba(14, 13, 12, 0.32);
 }
 
 .lesson-dialog h2 {
@@ -844,7 +846,8 @@ h2 {
   padding: 14px 16px;
   border: 1px solid var(--line-strong);
   border-radius: 16px;
-  background: rgba(247, 244, 240, 0.8);
+  background: rgba(9, 15, 20, 0.9);
+  color: var(--ink);
   resize: vertical;
 }
 
@@ -900,9 +903,9 @@ h2 {
   width: min(100%, 500px);
   padding: 28px 24px 22px;
   border-radius: 28px;
-  background: rgba(255,255,255,0.96);
+  background: linear-gradient(180deg, rgba(19, 29, 39, 0.98), rgba(12, 18, 24, 0.96));
   border: 1px solid var(--line);
-  box-shadow: 0 26px 80px rgba(10, 12, 13, 0.18);
+  box-shadow: 0 26px 80px rgba(10, 12, 13, 0.3);
 }
 
 .auth-dialog h2,
@@ -918,7 +921,7 @@ h2 {
   margin-top: 18px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(246, 241, 235, 0.85);
+  background: rgba(11, 17, 23, 0.9);
 }
 
 .auth-switch {
@@ -931,9 +934,9 @@ h2 {
 }
 
 .auth-switch.active {
-  background: white;
+  background: rgba(255, 255, 255, 0.08);
   color: var(--ink);
-  box-shadow: 0 8px 18px rgba(15, 17, 18, 0.06);
+  box-shadow: 0 8px 18px rgba(15, 17, 18, 0.12);
 }
 
 .auth-dialog form {
@@ -953,7 +956,8 @@ h2 {
   padding: 0.9rem 1rem;
   border: 1px solid var(--line-strong);
   border-radius: 14px;
-  background: rgba(247, 244, 240, 0.78);
+  background: rgba(8, 13, 18, 0.9);
+  color: var(--ink);
 }
 
 .auth-links {
@@ -998,7 +1002,8 @@ h2 {
   border-radius: 14px;
   border: 1px solid var(--line);
   font-weight: 800;
-  background: rgba(255,255,255,0.72);
+  background: rgba(19, 29, 39, 0.9);
+  color: var(--ink);
 }
 
 .auth-panel {
