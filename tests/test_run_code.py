@@ -1,3 +1,4 @@
+import json
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -59,6 +60,8 @@ class RunCodeEndpointTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('id="lesson-modal"', page_html)
+        self.assertIn('action="/request-lesson"', page_html)
+        self.assertIn("if (!lessonModal.open) lessonModal.showModal()", page_html)
         self.assertIn('name="discord_username"', page_html)
         self.assertIn('name="experience"', page_html)
         self.assertIn('name="helper_type"', page_html)
@@ -108,6 +111,11 @@ class RunCodeEndpointTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Your request is on its way", response.get_data(as_text=True))
         mock_urlopen.assert_called_once()
+        webhook_request = mock_urlopen.call_args.args[0]
+        payload = json.loads(webhook_request.data.decode("utf-8"))
+        self.assertEqual(webhook_request.full_url, "https://discord.test/webhook")
+        self.assertEqual(payload["embeds"][0]["fields"][0]["value"], "learner")
+        self.assertEqual(payload["embeds"][0]["fields"][5]["value"], "Needs testing guidance")
 
     @patch("urllib.request.urlopen")
     def test_captcha_verification_endpoint_uses_server_secret(self, mock_urlopen):
