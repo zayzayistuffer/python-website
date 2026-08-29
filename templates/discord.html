@@ -72,6 +72,7 @@
     document.querySelector('#open-lesson-modal-hero').addEventListener('click', openLessonModal);
     document.querySelector('#close-lesson-modal').addEventListener('click', () => lessonModal.close());
     lessonModal.addEventListener('click', (event) => { if (event.target === lessonModal) lessonModal.close(); });
+    if (new URLSearchParams(window.location.search).get('request') === '1') lessonModal.showModal();
   </script>
 </body>
 </html>

@@ -12,7 +12,7 @@ from io import BytesIO
 from functools import wraps
 from zipfile import ZIP_DEFLATED, ZipFile
 
-from flask import Flask, jsonify, render_template, request, send_file, session
+from flask import Flask, jsonify, redirect, render_template, request, send_file, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
@@ -247,6 +247,8 @@ def discord():
 
 @app.route("/request-lesson", methods=["GET", "POST"])
 def request_lesson():
+    if request.method == "GET":
+        return redirect(url_for("discord", request="1"))
     form_data = {field: "" for field in ("discord_username", "experience", "helper_type", "goals", "availability", "context")}
     error = None
     submitted = False

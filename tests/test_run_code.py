@@ -65,6 +65,12 @@ class RunCodeEndpointTests(unittest.TestCase):
         self.assertIn('name="goals"', page_html)
         self.assertIn('name="availability"', page_html)
 
+    def test_request_lesson_opens_discord_modal(self):
+        response = self.client.get("/request-lesson")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], "/templates/discord.html?request=1")
+
     @patch("urllib.request.urlopen")
     def test_discord_page_submits_lesson_request_to_webhook(self, mock_urlopen):
         mock_urlopen.return_value.__enter__.return_value.status = 204
