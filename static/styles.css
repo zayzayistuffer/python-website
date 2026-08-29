@@ -903,9 +903,9 @@ h2 {
   width: min(100%, 500px);
   padding: 28px 24px 22px;
   border-radius: 28px;
-  background: linear-gradient(180deg, rgba(19, 29, 39, 0.98), rgba(12, 18, 24, 0.96));
-  border: 1px solid var(--line);
-  box-shadow: 0 26px 80px rgba(10, 12, 13, 0.3);
+  background: linear-gradient(180deg, rgba(12, 18, 24, 0.98), rgba(7, 11, 15, 0.98));
+  border: 1px solid rgba(214, 224, 236, 0.16);
+  box-shadow: 0 26px 80px rgba(2, 6, 12, 0.52);
 }
 
 .auth-dialog h2,
@@ -919,9 +919,9 @@ h2 {
   gap: 10px;
   padding: 6px;
   margin-top: 18px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(214, 224, 236, 0.12);
   border-radius: 999px;
-  background: rgba(11, 17, 23, 0.9);
+  background: rgba(8, 12, 17, 0.92);
 }
 
 .auth-switch {
@@ -929,14 +929,14 @@ h2 {
   background: transparent;
   padding: 0.7rem 1rem;
   border-radius: 999px;
-  color: var(--muted);
+  color: #d7dfe8;
   font-weight: 800;
 }
 
 .auth-switch.active {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(24, 35, 45, 0.96);
   color: var(--ink);
-  box-shadow: 0 8px 18px rgba(15, 17, 18, 0.12);
+  box-shadow: 0 8px 18px rgba(15, 17, 18, 0.24);
 }
 
 .auth-dialog form {
@@ -954,9 +954,9 @@ h2 {
   width: 100%;
   margin-bottom: 16px;
   padding: 0.9rem 1rem;
-  border: 1px solid var(--line-strong);
+  border: 1px solid rgba(214, 224, 236, 0.14);
   border-radius: 14px;
-  background: rgba(8, 13, 18, 0.9);
+  background: rgba(6, 10, 15, 0.96);
   color: var(--ink);
 }
 
@@ -979,7 +979,7 @@ h2 {
 .auth-reset-link {
   border: 0;
   background: transparent;
-  color: var(--brand-deep);
+  color: #e7c789;
   padding: 0;
 }
 
@@ -1000,9 +1000,9 @@ h2 {
   margin-top: 10px;
   padding: 0.9rem 1rem;
   border-radius: 14px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(214, 224, 236, 0.12);
   font-weight: 800;
-  background: rgba(19, 29, 39, 0.9);
+  background: rgba(15, 22, 29, 0.96);
   color: var(--ink);
 }
 
