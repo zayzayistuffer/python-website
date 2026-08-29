@@ -42,7 +42,7 @@
         <button class="auth-close" id="auth-close" type="button" aria-label="Close account dialog">×</button>
         <p class="eyebrow">Your workspace</p><h2 id="auth-title">Keep your work<br><i>close.</i></h2>
         <div class="auth-switcher"><button class="auth-switch active" data-mode="login" type="button">Log in</button><button class="auth-switch" data-mode="register" type="button">Create account</button></div>
-        <form id="auth-form"><label for="auth-email">Email address</label><input id="auth-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required><label for="auth-password">Password</label><input id="auth-password" name="password" type="password" minlength="8" autocomplete="current-password" required><button class="auth-submit" type="submit" id="auth-submit">Log in <span>↗</span></button><button class="discord-button" id="discord-login" type="button">Continue with Discord <span>↗</span></button><p class="auth-message" id="auth-message" role="status"></p></form>
+        <form id="auth-form"><label for="auth-email">Email address</label><input id="auth-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required><label for="auth-password">Password</label><input id="auth-password" name="password" type="password" minlength="8" autocomplete="current-password" required><div class="auth-links"><button class="auth-reset-link" id="auth-reset-link" type="button">Forgot your password?</button></div><div class="auth-captcha" id="auth-captcha" aria-live="polite"><div class="h-captcha" data-sitekey="{{ hcaptcha_sitekey }}" data-theme="light"></div></div><button class="auth-submit" type="submit" id="auth-submit">Log in <span>↗</span></button><button class="discord-button" id="discord-login" type="button">Continue with Discord <span>↗</span></button><button class="github-button" id="github-login" type="button">Continue with GitHub <span>↗</span></button><p class="auth-message" id="auth-message" role="status"></p></form>
       </div>
     </div>
     <div class="profile-modal" id="profile-modal" aria-hidden="true"><div class="profile-dialog" role="dialog" aria-modal="true" aria-labelledby="profile-title"><button class="auth-close" id="profile-close" type="button" aria-label="Close profile">×</button><p class="eyebrow">Your account</p><h2 id="profile-title">Your <i>profile.</i></h2><p class="profile-email" id="profile-email"></p><p class="profile-status" id="profile-status"></p><button class="profile-logout" id="profile-logout" type="button">Log out</button></div></div>
@@ -90,7 +90,7 @@ def greet(name):
 
 print(greet("curious human"))
 print(f"It is {datetime.now():%A}.")</textarea>
-              <div class="playground-actions"><span class="branch-label">⎇ main</span><button class="run-button" id="run-code" type="button" disabled><span>▶</span> Run Python</button><button class="reset-button" id="reset-code" type="button">Reset</button><span class="shortcut">Ctrl / Cmd + Enter</span></div>
+              <div class="playground-actions"><span class="branch-label">⎇ main</span><button class="run-button" id="run-code" type="button" disabled><span>▶</span> Launch Code</button><button class="reset-button" id="reset-code" type="button">Reset</button><span class="shortcut">Ctrl / Cmd + Enter</span></div>
               <div class="output-panel"><div class="output-label"><span class="terminal-symbol">›_</span> Terminal <span id="run-time"></span></div><pre id="code-output">Your output will appear here.</pre></div>
             </div>
           </div>
@@ -124,6 +124,7 @@ print(f"It is {datetime.now():%A}.")</textarea>
 
     <footer class="site-footer"><span>© 2026 Python in Practice</span><span>Made with intention + Python</span><a href="#top">Back to top ↑</a></footer>
   </div>
+  <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
   <script>
@@ -181,7 +182,7 @@ print(f"It is {datetime.now():%A}.")</textarea>
       codeEditor.setOption('mode', isPython ? 'python' : 'markdown');
       codeEditor.setOption('readOnly', !activeFile || activeFile === '.venv');
       languageStatus.innerHTML = isPython ? '◉ &nbsp; Python' : '◉ &nbsp; ' + (activeFile === 'README.md' ? 'Markdown' : 'No file');
-      runButton.disabled = !pyodide || !isPython;
+      runButton.disabled = !isPython;
       document.querySelectorAll('.file-item').forEach((item) => item.classList.toggle('active', item.dataset.file === activeFile));
       renderTabs();
     }
@@ -225,6 +226,31 @@ print(f"It is {datetime.now():%A}.")</textarea>
       runTime.textContent = '';
       updateEditorState();
       saveWorkspace();
+    }
+
+    async function loadCloudWorkspace() {
+      if (!currentUser || !supabaseClient) return;
+      const { data, error } = await supabaseClient.from('workspaces').select('files').eq('user_id', currentUser.id).maybeSingle();
+      if (error) {
+        console.error('Workspace load failed:', error);
+        return;
+      }
+      if (!data?.files) {
+        if (activeFile) fileContents[activeFile] = codeEditor.getValue();
+        await supabaseClient.from('workspaces').upsert({ user_id: currentUser.id, files: fileContents, updated_at: new Date().toISOString() });
+        return;
+      }
+      isApplyingWorkspace = true;
+      clearTimeout(saveTimer);
+      Object.keys(fileContents).forEach((fileName) => delete fileContents[fileName]);
+      Object.assign(fileContents, data.files);
+      activeFile = Object.keys(fileContents).find((name) => name.endsWith('.py')) || 'scratch.py';
+      openFiles = [activeFile];
+      codeEditor.setValue(fileContents[activeFile] || '');
+      codeEditor.clearHistory();
+      renderFileList();
+      updateEditorState();
+      isApplyingWorkspace = false;
     }
 
     function saveWorkspace() {
@@ -344,24 +370,45 @@ print(f"It is {datetime.now():%A}.")</textarea>
     };
     document.head.appendChild(script);
 
+    function appendTerminal(chunk) {
+      const text = typeof chunk === 'string' ? chunk : String(chunk ?? '');
+      output.textContent += text;
+      if (!text.endsWith('\n')) output.textContent += '\n';
+    }
+
     async function runCode() {
-      if (!pyodide || !activeFile || !activeFile.endsWith('.py')) return;
+      if (!activeFile || !activeFile.endsWith('.py')) return;
+      if (!codeEditor) return;
+      fileContents[activeFile] = codeEditor.getValue();
+      saveWorkspace();
       runButton.disabled = true;
       runButton.innerHTML = '<span class="spinner"></span> Running';
       output.classList.remove('error');
+      output.textContent = '';
       const started = performance.now();
       try {
-        pyodide.setStdout({ batched: (text) => { output.textContent += text + '\n'; } });
-        output.textContent = '';
-        await pyodide.runPythonAsync(codeEditor.getValue());
-        if (!output.textContent) output.textContent = 'Code ran successfully with no output.';
+        const siteBaseUrl = window.location.origin || 'https://code.pip.abrdns.com';
+        const response = await fetch(`${siteBaseUrl}/api/run-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: codeEditor.getValue() })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'The code could not be executed.');
+        }
+        const joinedOutput = (data.stdout || '') + (data.stderr || '');
+        output.textContent = joinedOutput || (data.ok ? 'Code ran successfully with no output.' : 'The code finished without printing any output.');
+        if (!data.ok) {
+          output.classList.add('error');
+        }
         runTime.textContent = `${Math.round(performance.now() - started)} ms`;
       } catch (error) {
-        output.textContent = error.message;
+        output.textContent = error?.message || String(error);
         output.classList.add('error');
       } finally {
         runButton.disabled = false;
-        runButton.innerHTML = '<span>▶</span> Run Python';
+        runButton.innerHTML = '<span>▶</span> Launch Code';
       }
     }
 
@@ -384,7 +431,14 @@ print(f"It is {datetime.now():%A}.")</textarea>
     const authMessage = document.querySelector('#auth-message');
     const authTitle = document.querySelector('#auth-title');
     const authSubmit = document.querySelector('#auth-submit');
+    const authResetLink = document.querySelector('#auth-reset-link');
+    const hCaptchaWidget = document.querySelector('.h-captcha');
     let authMode = 'login';
+
+    function getCaptchaToken() {
+      if (!hCaptchaWidget || !window.hcaptcha) return null;
+      return window.hcaptcha.getResponse(hCaptchaWidget) || null;
+    }
 
     function showAuthModal() {
       authModal.setAttribute('aria-hidden', 'false');
@@ -407,20 +461,79 @@ print(f"It is {datetime.now():%A}.")</textarea>
       authMessage.textContent = '';
     }
 
-    function needsEmailConfirmation(user) {
-      return !isDiscordUser(user) && (user?.app_metadata?.provider === 'email' || user?.identities?.some((identity) => identity.provider === 'email'));
+    async function requestPasswordReset() {
+      const email = document.querySelector('#auth-email').value.trim();
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        authMessage.textContent = 'Enter your email address to receive a reset link.';
+        return;
+      }
+      if (!supabaseClient) {
+        authMessage.textContent = 'Supabase is not configured.';
+        return;
+      }
+
+      authSubmit.disabled = true;
+      authMessage.textContent = 'Sending reset link...';
+
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}${window.location.pathname}`
+      });
+
+      authSubmit.disabled = false;
+      if (error) {
+        authMessage.textContent = error.message;
+        return;
+      }
+
+      authMessage.textContent = 'Password reset email sent. Check your inbox.';
     }
 
-    function isDiscordUser(user) {
-      return user?.app_metadata?.provider === 'discord' || user?.identities?.some((identity) => identity.provider === 'discord');
+    function needsEmailConfirmation(user) {
+      return !isSocialUser(user) && (user?.app_metadata?.provider === 'email' || user?.identities?.some((identity) => identity.provider === 'email'));
+    }
+
+    function isSocialUser(user) {
+      const providers = new Set(['discord', 'github']);
+      return user?.app_metadata?.provider && providers.has(user.app_metadata.provider) || user?.identities?.some((identity) => identity.provider && providers.has(identity.provider));
+    }
+
+    function providerDisplayName(user) {
+      const provider = user?.app_metadata?.provider || user?.identities?.find((identity) => ['discord', 'github'].includes(identity.provider))?.provider;
+      if (provider === 'github') return 'GitHub account';
+      if (provider === 'discord') return 'Discord account';
+      return 'Email confirmed';
     }
 
     function displayEmail(user) {
-      if (!isDiscordUser(user)) return user?.email || 'Account';
-      const discordIdentity = user.identities?.find((identity) => identity.provider === 'discord');
-      const metadata = { ...discordIdentity?.identity_data, ...user.user_metadata };
-      const username = metadata.user_name || metadata.preferred_username || metadata.username || metadata.global_name || metadata.full_name || 'user';
-      return `${String(username).trim().replace(/[^a-zA-Z0-9._-]/g, '_')}@discord.com`;
+      if (!isSocialUser(user)) return user?.email || 'Account';
+      const provider = user?.app_metadata?.provider || user?.identities?.find((identity) => ['discord', 'github'].includes(identity.provider))?.provider;
+      const identity = user?.identities?.find((identity) => identity.provider === provider);
+      const metadata = { ...identity?.identity_data, ...user.user_metadata };
+      const username = metadata.user_name || metadata.preferred_username || metadata.username || metadata.login || metadata.global_name || metadata.full_name || metadata.name || 'user';
+      return `${String(username).trim().replace(/[^a-zA-Z0-9._-]/g, '_')}@${provider || 'social'}.com`;
+    }
+
+    async function verifyCaptcha() {
+      const captchaToken = getCaptchaToken();
+      if (!captchaToken) {
+        authMessage.textContent = 'Please complete the verification challenge.';
+        return false;
+      }
+
+      const response = await fetch('/api/verify-captcha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ captcha_token: captchaToken })
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.ok) {
+        authMessage.textContent = data.error || 'Captcha verification failed.';
+        if (window.hcaptcha) window.hcaptcha.reset(hCaptchaWidget);
+        return false;
+      }
+
+      return true;
     }
 
     async function submitAuth(event) {
@@ -430,9 +543,18 @@ print(f"It is {datetime.now():%A}.")</textarea>
       if (!supabaseClient) { authMessage.textContent = 'Supabase is not configured.'; authSubmit.disabled = false; return; }
       const values = Object.fromEntries(new FormData(authForm));
       if (authMode === 'register' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(values.email)) { authMessage.textContent = 'Enter a valid email address.'; authSubmit.disabled = false; return; }
-      const result = authMode === 'login' ? await supabaseClient.auth.signInWithPassword(values) : await supabaseClient.auth.signUp({ ...values, options: { emailRedirectTo: window.location.origin } });
+      const captchaVerified = await verifyCaptcha();
+      if (!captchaVerified) {
+        authSubmit.disabled = false;
+        return;
+      }
+
+      const result = authMode === 'login'
+        ? await supabaseClient.auth.signInWithPassword(values)
+        : await supabaseClient.auth.signUp({ ...values, options: { emailRedirectTo: window.location.origin } });
       if (result.error) {
         authMessage.textContent = result.error.message;
+        if (window.hcaptcha) window.hcaptcha.reset(hCaptchaWidget);
         authSubmit.disabled = false;
         return;
       }
@@ -442,24 +564,38 @@ print(f"It is {datetime.now():%A}.")</textarea>
       hideAuthModal();
       unlockSite();
       updateAccount();
+      if (window.hcaptcha) window.hcaptcha.reset(hCaptchaWidget);
     }
 
     function unlockSite() { document.body.classList.remove('auth-required'); document.querySelector('#auth-gate').hidden = true; }
     function updateAccount() { const button = document.querySelector('#account-button'); if (currentUser) { button.textContent = displayEmail(currentUser); button.classList.add('signed-in'); } }
-    function showProfile() { if (!currentUser) return showAuthModal(); document.querySelector('#profile-email').textContent = displayEmail(currentUser); document.querySelector('#profile-status').textContent = isDiscordUser(currentUser) ? 'Discord account' : 'Email confirmed'; document.querySelector('#profile-modal').classList.add('open'); }
+    function showProfile() { if (!currentUser) return showAuthModal(); document.querySelector('#profile-email').textContent = displayEmail(currentUser); document.querySelector('#profile-status').textContent = providerDisplayName(currentUser); document.querySelector('#profile-modal').classList.add('open'); }
     async function signOut() { await supabaseClient?.auth.signOut(); currentUser = null; document.body.classList.add('auth-required'); document.querySelector('#auth-gate').hidden = false; updateAccount(); document.querySelector('#profile-modal').classList.remove('open'); }
     document.querySelector('#account-button').addEventListener('click', () => currentUser ? showProfile() : showAuthModal());
     document.querySelector('#auth-close').addEventListener('click', hideAuthModal);
     authModal.addEventListener('click', (event) => { if (event.target === authModal) hideAuthModal(); });
     document.querySelectorAll('.auth-switch').forEach((button) => button.addEventListener('click', () => setAuthMode(button.dataset.mode)));
+    authResetLink.addEventListener('click', requestPasswordReset);
     authForm.addEventListener('submit', submitAuth);
     document.querySelector('#logout-button')?.addEventListener('click', signOut);
     document.querySelector('#profile-close').addEventListener('click', () => document.querySelector('#profile-modal').classList.remove('open'));
     document.querySelector('#profile-logout').addEventListener('click', signOut);
     document.querySelector('#auth-gate-login').addEventListener('click', showAuthModal);
     document.querySelector('#discord-login').addEventListener('click', async () => { if (!supabaseClient) return; const result = await supabaseClient.auth.signInWithOAuth({ provider: 'discord', options: { redirectTo: window.location.href } }); if (result.error) authMessage.textContent = result.error.message; });
+    document.querySelector('#github-login').addEventListener('click', async () => { if (!supabaseClient) return; const result = await supabaseClient.auth.signInWithOAuth({ provider: 'github', options: { redirectTo: window.location.href } }); if (result.error) authMessage.textContent = result.error.message; });
+    if (supabaseClient) {
+      supabaseClient.auth.getUser().then(async ({ data }) => {
+        currentUser = data.user;
+        if (currentUser && (!needsEmailConfirmation(currentUser) || currentUser.email_confirmed_at)) {
+          unlockSite();
+          updateAccount();
+          if (typeof loadCloudWorkspace === 'function') await loadCloudWorkspace();
+        } else if (currentUser) {
+          await signOut();
+        }
+      });
+    }
   </script>
-  if (supabaseClient) supabaseClient.auth.getUser().then(({ data }) => { currentUser = data.user; if (currentUser && (!needsEmailConfirmation(currentUser) || currentUser.email_confirmed_at)) { unlockSite(); updateAccount(); if (typeof loadCloudWorkspace === 'function') loadCloudWorkspace(); } else if (currentUser) signOut(); });
   {% if workbench_page %}<script>
     codeEditor.on('change', saveWorkspace);
 

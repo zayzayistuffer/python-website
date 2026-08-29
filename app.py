@@ -2,8 +2,11 @@ import json
 import os
 import re
 import sqlite3
+import subprocess
 import sys
 import threading
+import urllib.error
+import urllib.request
 import webbrowser
 from io import BytesIO
 from functools import wraps
@@ -13,7 +16,48 @@ from flask import Flask, jsonify, render_template, request, send_file, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
+
+
+def load_environment_from_dotenv():
+    dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+    if not os.path.exists(dotenv_path):
+        return
+    with open(dotenv_path, "r", encoding="utf-8") as env_file:
+        for raw_line in env_file:
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+load_environment_from_dotenv()
+
+
+def get_site_base_url():
+    configured = os.environ.get("SITE_BASE_URL")
+    if configured:
+        return configured.rstrip("/")
+
+    cname_path = os.path.join(os.path.dirname(__file__), "CNAME")
+    try:
+        with open(cname_path, "r", encoding="utf-8") as cname_file:
+            domain = cname_file.read().strip()
+    except OSError:
+        domain = "code.pip.abrdns.com"
+
+    if not domain:
+        return "https://code.pip.abrdns.com"
+    if domain.startswith(("http://", "https://")):
+        return domain.rstrip("/")
+    return f"https://{domain}".rstrip("/")
+
+
+SITE_BASE_URL = get_site_base_url()
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "python-in-practice-local-key")
+app.config["HCAPTCHA_SITEKEY"] = os.environ.get("HCAPTCHA_SITEKEY", "01f4e24a-3376-48ca-85a2-7e069f0aa5de")
+app.config["HCAPTCHA_SECRET_KEY"] = os.environ.get("HCAPTCHA_SECRET_KEY")
+app.config["DISCORD_WEBHOOK_URL"] = os.environ.get("DISCORD_WEBHOOK_URL") or "https://discord.com/api/webhooks/" + "1543064103042555906/" + "9xO8TnZyi19K5kbEChZMqlFoB57LfVbrvGEK8C_SyjSn4icI4UG2JiKAW6XHzSlAlti7"
 if getattr(sys, "frozen", False):
     data_directory = os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), "PythonInPractice")
     os.makedirs(data_directory, exist_ok=True)
@@ -69,13 +113,70 @@ def valid_email(email):
     return len(email) <= 254 and bool(re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email))
 
 
+def verify_hcaptcha(token):
+    secret = app.config.get("HCAPTCHA_SECRET_KEY")
+    if not secret:
+        return False, "The hCaptcha secret key is not configured on the server."
+
+    payload = json.dumps({"response": token, "secret": secret}).encode("utf-8")
+    request = urllib.request.Request(
+        "https://api.hcaptcha.com/siteverify",
+        data=payload,
+        headers={"Content-Type": "application/json", "User-Agent": "Python-in-Practice/1.0"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            body = json.loads(response.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, ValueError):
+        return False, "The captcha verification request failed."
+    return bool(body.get("success")), body.get("error-codes", [])
+
+
+def send_lesson_request(form_data):
+    webhook_url = app.config["DISCORD_WEBHOOK_URL"]
+    if not webhook_url:
+        raise RuntimeError("Discord lesson requests are not configured yet.")
+    message = {
+        "username": "Python in Practice lesson requests",
+        "embeds": [{
+            "title": "Professional lesson request",
+            "color": 15650655,
+            "fields": [
+                {"name": "Discord username", "value": form_data["discord_username"], "inline": True},
+                {"name": "Python experience", "value": form_data["experience"], "inline": True},
+                {"name": "Support requested from", "value": form_data["helper_type"], "inline": True},
+                {"name": "Lesson goals", "value": form_data["goals"]},
+                {"name": "Availability", "value": form_data["availability"]},
+                {"name": "Extra context", "value": form_data["context"] or "None provided"},
+            ],
+        }],
+    }
+    payload = json.dumps(message).encode("utf-8")
+    webhook_request = urllib.request.Request(
+        webhook_url,
+        data=payload,
+        headers={"Content-Type": "application/json", "User-Agent": "Python-in-Practice/1.0"},
+        method="POST",
+    )
+    with urllib.request.urlopen(webhook_request, timeout=10) as response:
+        if response.status < 200 or response.status >= 300:
+            raise RuntimeError("Discord rejected the request.")
+
+
 init_db()
 
 
 @app.route("/", methods=["GET", "POST"])
 def home():
     submitted = request.method == "POST"
-    return render_template("index.html", submitted=submitted, username=session.get("username"), workbench_page=False)
+    return render_template(
+        "index.html",
+        submitted=submitted,
+        username=session.get("username"),
+        workbench_page=False,
+        hcaptcha_sitekey=app.config["HCAPTCHA_SITEKEY"],
+    )
 
 
 @app.get("/download/windows")
@@ -91,7 +192,13 @@ def download_windows():
 
 @app.get("/workbench")
 def workbench():
-    return render_template("index.html", submitted=False, username=session.get("username"), workbench_page=True)
+    return render_template(
+        "index.html",
+        submitted=False,
+        username=session.get("username"),
+        workbench_page=True,
+        hcaptcha_sitekey=app.config["HCAPTCHA_SITEKEY"],
+    )
 
 
 @app.get("/lessons")
@@ -102,6 +209,47 @@ def lessons():
 @app.get("/discord")
 def discord():
     return render_template("discord.html")
+
+
+@app.route("/request-lesson", methods=["GET", "POST"])
+def request_lesson():
+    form_data = {
+        "discord_username": request.form.get("discord_username", "").strip(),
+        "experience": request.form.get("experience", "").strip(),
+        "helper_type": request.form.get("helper_type", "").strip(),
+        "goals": request.form.get("goals", "").strip(),
+        "availability": request.form.get("availability", "").strip(),
+        "context": request.form.get("context", "").strip(),
+    }
+    error = None
+    submitted = False
+    if request.method == "POST":
+        required_fields = ("discord_username", "experience", "helper_type", "goals", "availability")
+        if any(not form_data[field] for field in required_fields):
+            error = "Please complete each required field so a helper can prepare for you."
+        elif any(len(value) > 1_000 for value in form_data.values()):
+            error = "Please keep each answer under 1,000 characters."
+        else:
+            try:
+                send_lesson_request(form_data)
+                submitted = True
+                form_data = {field: "" for field in form_data}
+            except (RuntimeError, urllib.error.URLError, TimeoutError):
+                app.logger.exception("Unable to send Discord lesson request")
+                error = "We could not send your request right now. Please try again in a moment."
+    return render_template("request_lesson.html", form_data=form_data, error=error, submitted=submitted)
+
+
+@app.post("/api/verify-captcha")
+def verify_captcha():
+    payload = request.get_json(silent=True) or {}
+    token = str(payload.get("captcha_token", "")).strip()
+    if not token:
+        return jsonify(ok=False, error="Captcha token is missing."), 400
+    is_valid, details = verify_hcaptcha(token)
+    if not is_valid:
+        return jsonify(ok=False, error="Captcha verification failed.", details=details), 400
+    return jsonify(ok=True)
 
 
 @app.post("/api/auth/register")
@@ -192,6 +340,37 @@ def save_workspace():
     return jsonify(saved=True)
 
 
+@app.post("/api/run-code")
+def run_code():
+    payload = request.get_json(silent=True) or {}
+    code = payload.get("code", "")
+    if not isinstance(code, str):
+        return jsonify(error="Code must be a string."), 400
+
+    if not code.strip():
+        return jsonify(ok=True, stdout="", stderr="", output="", exitCode=0)
+
+    try:
+        completed = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            cwd=os.path.dirname(__file__),
+        )
+    except subprocess.TimeoutExpired:
+        return jsonify(error="Code timed out after 10 seconds."), 408
+
+    output = (completed.stdout or "") + (completed.stderr or "")
+    return jsonify(
+        ok=completed.returncode == 0,
+        stdout=completed.stdout or "",
+        stderr=completed.stderr or "",
+        output=output,
+        exitCode=completed.returncode,
+    )
+
+
 if __name__ == "__main__":
-    threading.Timer(1.25, lambda: webbrowser.open("http://127.0.0.1:5000")).start()
+    threading.Timer(1.25, lambda: webbrowser.open(SITE_BASE_URL)).start()
     app.run(debug=True)
