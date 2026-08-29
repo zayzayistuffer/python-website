@@ -21,7 +21,7 @@
       <nav class="site-nav" aria-label="Main navigation">
         <a href="workbench.html">Workbench</a>
         <a href="lessons.html">Lessons</a>
-        <a href="https://code.pip.abrdns.com/templates/discord.html">Discord</a>
+        <a href="discord.html">Discord</a>
         <button class="nav-action nav-request" type="button" data-open-request>Request lesson</button>
         <a href="#principles">Principles</a>
         <a href="#field-notes">Field notes</a>
@@ -47,6 +47,13 @@
         <input id="auth-email" type="email" required autocomplete="email">
         <label for="auth-password">Password</label>
         <input id="auth-password" type="password" required minlength="8" autocomplete="current-password">
+        <div class="auth-links">
+          <button class="auth-reset-button" id="auth-reset-button" type="button">Reset password</button>
+          <button class="auth-reset-link" id="auth-reset-link" type="button">Forgot your password?</button>
+        </div>
+        <div class="auth-captcha" id="auth-captcha" aria-live="polite">
+          <div class="h-captcha" data-sitekey="01f4e24a-3376-48ca-85a2-7e069f0aa5de" data-theme="light"></div>
+        </div>
         <button id="auth-submit" type="submit">Log in</button><button class="discord-button" id="discord-login" type="button">Continue with Discord <span>↗</span></button><button class="github-button" id="github-login" type="button">Continue with GitHub <span>↗</span></button>
         <p class="auth-message" id="auth-message"></p>
       </form>
@@ -58,9 +65,12 @@
       <section class="hero section-pad">
         <div class="hero-copy reveal">
           <p class="eyebrow"><span class="eyebrow-dot"></span> An independent guide for builders</p>
-          <h1>Learn how to code in python!</h1>
-          <p class="hero-intro">A considered approach to Python.</p>
-          <a class="text-link" href="#principles">Explore the principles <span aria-hidden="true">↓</span></a>
+          <h1>Make it clear.<br><i>Make it last.</i></h1>
+          <p class="hero-intro">A considered approach to Python, product thinking, and the small decisions that turn good code into useful software.</p>
+          <div class="hero-actions">
+            <a class="text-link" href="#principles">Explore the principles <span aria-hidden="true">↓</span></a>
+            <button class="discord-request" type="button" data-open-request>Request a professional lesson <span aria-hidden="true">↗</span></button>
+          </div>
         </div>
         <div class="hero-art reveal" aria-label="Abstract illustration of a Python code window" role="img">
           <div class="art-sun"></div>

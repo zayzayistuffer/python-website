@@ -194,25 +194,42 @@ def process_lesson_request():
     return {field: "" for field in form_data}, None, True
 
 
+def render_discord_page_with_notice(notice_text):
+    with open(os.path.join(os.path.dirname(__file__), "discord.html"), "r", encoding="utf-8") as page_file:
+        html = page_file.read()
+    if "request-notice" in html:
+        return html
+    success_html = f"<div class='request-notice request-success' role='status'>{notice_text}</div>"
+    return html.replace("</body>", f"{success_html}\n</body>")
+
+
 init_db()
 
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    submitted = request.method == "POST"
-    return render_template(
-        "index.html",
-        submitted=submitted,
-        username=session.get("username"),
-        workbench_page=False,
-        hcaptcha_sitekey=app.config["HCAPTCHA_SITEKEY"],
-    )
+    return send_file("index.html")
+
+
+@app.get("/index.html")
+def index_page():
+    return send_file("index.html")
+
+
+@app.get("/lessons.html")
+def lessons_page():
+    return send_file("lessons.html")
+
+
+@app.get("/discord.html")
+def discord_page():
+    return send_file("discord.html")
 
 
 @app.get("/download/windows")
 def download_windows():
     bundle = BytesIO()
-    files = ("app.py", "requirements.txt", "README.md", "run_windows.bat", "static/styles.css", "static/supabase-config.js", "templates/index.html")
+    files = ("app.py", "requirements.txt", "README.md", "run_windows.bat", "static/styles.css", "static/supabase-config.js", "index.html", "lessons.html", "discord.html")
     with ZipFile(bundle, "w", ZIP_DEFLATED) as archive:
         for relative_path in files:
             archive.write(os.path.join(os.path.dirname(__file__), relative_path), os.path.join("python-in-practice", relative_path))
@@ -222,36 +239,49 @@ def download_windows():
 
 @app.get("/workbench")
 def workbench():
-    return render_template(
-        "index.html",
-        submitted=False,
-        username=session.get("username"),
-        workbench_page=True,
-        hcaptcha_sitekey=app.config["HCAPTCHA_SITEKEY"],
-    )
+    return send_file("index.html")
 
 
 @app.get("/lessons")
 def lessons():
-    return render_template("lessons.html")
+    return send_file("lessons.html")
+
+
+@app.route("/discord.html", methods=["GET", "POST"])
+def discord():
+    if request.method == "POST":
+        _, error, submitted = process_lesson_request()
+        if error:
+            return send_file("discord.html")
+        if submitted:
+            return render_discord_page_with_notice("Your request is on its way. A helper will reach out in Discord.")
+    return send_file("discord.html")
 
 
 @app.route("/templates/discord.html", methods=["GET", "POST"])
-def discord():
-    form_data = {field: "" for field in ("discord_username", "experience", "helper_type", "goals", "availability", "context")}
-    error = None
-    submitted = False
-    if request.method == "POST":
-        form_data, error, submitted = process_lesson_request()
-    return render_template("discord.html", form_data=form_data, error=error, submitted=submitted)
+def legacy_discord_redirect():
+    return redirect("/discord.html")
+
+
+@app.route("/templates/index.html")
+def legacy_index_redirect():
+    return redirect("/index.html")
+
+
+@app.route("/templates/lessons.html")
+def legacy_lessons_redirect():
+    return redirect("/lessons.html")
 
 
 @app.route("/request-lesson", methods=["GET", "POST"])
 def request_lesson():
-    if request.method == "GET":
-        return redirect(url_for("discord", request="1"))
-    form_data, error, submitted = process_lesson_request()
-    return render_template("discord.html", form_data=form_data, error=error, submitted=submitted)
+    if request.method == "POST":
+        _, error, submitted = process_lesson_request()
+        if error:
+            return send_file("discord.html")
+        if submitted:
+            return render_discord_page_with_notice("Your request is on its way. A helper will reach out in Discord.")
+    return redirect("/discord.html?request=1")
 
 
 @app.post("/api/verify-captcha")
@@ -394,5 +424,5 @@ def run_code():
 
 
 if __name__ == "__main__":
-    threading.Timer(1.25, lambda: webbrowser.open(f"{SITE_BASE_URL}/templates/discord.html")).start()
+    threading.Timer(1.25, lambda: webbrowser.open(f"{SITE_BASE_URL}/discord.html")).start()
     app.run(debug=True)

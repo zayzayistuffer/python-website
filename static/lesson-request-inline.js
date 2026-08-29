@@ -19,7 +19,7 @@
       try {
         const formData = new FormData(form);
         const embed = {
-          title: '📚 New Lesson Request',
+          title: '📚 New Lesson Request, @Owner @Co Owner @Trainer @Voluntary Helper ',
           color: 3093151,
           fields: [
             { name: 'Discord Username', value: formData.get('discord_username'), inline: true },

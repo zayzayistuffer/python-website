@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Join the Python in Practice Discord community.">
+  <title>Discord | Python in Practice</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand-lockup" href="index.html#top" aria-label="Python in Practice home">
+        <img src="https://www.python.org/static/community_logos/python-logo.png" alt="Python logo">
+        <span>Python in Practice</span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="index.html#top">Home</a>
+        <a href="lessons.html">Lessons</a>
+        <a href="discord.html">Discord</a>
+        <button class="nav-action nav-request" id="open-lesson-modal" type="button">Request lesson</button>
+        <a href="index.html#principles">Principles</a>
+        <a href="index.html#field-notes">Field notes</a>
+      </nav>
+      <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">Menu <span>+</span></button>
+    </header>
+
+    <main class="discord-page">
+      <section class="discord-hero">
+        <div>
+          <p class="eyebrow"><span class="eyebrow-dot"></span> The community</p>
+          <h1>Come build<br><i>with us.</i></h1>
+          <p class="discord-copy">Join the Python in Practice Discord server to ask questions, share what you are making, and find a little company while you learn.</p>
+          <a class="discord-join" href="https://discord.gg/CG9hD62UYC" target="_blank" rel="noopener noreferrer">Join the Discord server <span aria-hidden="true">↗</span></a>
+          <button class="discord-request" id="open-lesson-modal-hero" type="button">Request a professional lesson <span aria-hidden="true">↗</span></button>
+        </div>
+        <div class="discord-mark" aria-hidden="true">⌁</div>
+      </section>
+    </main>
+
+    <dialog class="lesson-modal" id="lesson-modal" aria-labelledby="lesson-modal-title">
+      <div class="lesson-dialog">
+        <button class="lesson-close" id="close-lesson-modal" type="button" aria-label="Close lesson request">×</button>
+        <p class="eyebrow"><span class="eyebrow-dot"></span> Personal guidance</p>
+        <h2 id="lesson-modal-title">Shape your<br><i>next lesson.</i></h2>
+        <form class="request-form" method="post" action="/api/lesson-request">
+          <div class="request-field">
+            <label for="modal_discord_username">Discord username <span>*</span></label>
+            <input id="modal_discord_username" name="discord_username" type="text" placeholder="yourname" maxlength="100" required>
+          </div>
+          <div class="request-field">
+            <label for="modal_experience">How advanced are you in Python development? <span>*</span></label>
+            <select id="modal_experience" name="experience" required>
+              <option value="">Choose your current level</option>
+              <option>Just starting</option>
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
+              <option>Professional developer</option>
+            </select>
+          </div>
+          <div class="request-field">
+            <label for="modal_helper_type">Who would you like help from? <span>*</span></label>
+            <select id="modal_helper_type" name="helper_type" required>
+              <option value="">Choose a helper</option>
+              <option>A professional trainer</option>
+              <option>A volunteer helper</option>
+              <option>The owner</option>
+            </select>
+          </div>
+          <div class="request-field">
+            <label for="modal_goals">What would you like to learn or build? <span>*</span></label>
+            <textarea id="modal_goals" name="goals" rows="3" maxlength="1000" required></textarea>
+          </div>
+          <div class="request-field">
+            <label for="modal_availability">When are you usually available? <span>*</span></label>
+            <input id="modal_availability" name="availability" type="text" maxlength="1000" placeholder="Weekday evenings, UTC-5" required>
+          </div>
+          <div class="request-field">
+            <label for="modal_context">Anything else that would help us prepare?</label>
+            <textarea id="modal_context" name="context" rows="2" maxlength="1000"></textarea>
+          </div>
+          <button class="request-submit" type="submit">Send lesson request <span aria-hidden="true">↗</span></button>
+        </form>
+      </div>
+    </dialog>
+
+    <footer class="site-footer"><span>© 2026 Python in Practice</span><a href="index.html#top">Back to home ↑</a></footer>
+  </div>
+
+  <script>
+    const menu = document.querySelector('.menu-toggle');
+    const nav = document.querySelector('.site-nav');
+    menu.addEventListener('click', () => {
+      const open = menu.getAttribute('aria-expanded') === 'true';
+      menu.setAttribute('aria-expanded', String(!open));
+      nav.classList.toggle('is-open', !open);
+    });
+
+    const lessonModal = document.querySelector('#lesson-modal');
+    const openLessonModal = () => { if (lessonModal && !lessonModal.open) lessonModal.showModal(); };
+    document.querySelector('#open-lesson-modal').addEventListener('click', openLessonModal);
+    document.querySelector('#open-lesson-modal-hero').addEventListener('click', openLessonModal);
+    document.querySelector('#close-lesson-modal').addEventListener('click', () => lessonModal.close());
+    lessonModal.addEventListener('click', (event) => { if (event.target === lessonModal) lessonModal.close(); });
+    if (new URLSearchParams(window.location.search).get('request') === '1' || lessonModal.hasAttribute('open')) {
+      if (!lessonModal.open) lessonModal.showModal();
+    }
+
+    const requestForm = document.querySelector('.request-form');
+    requestForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const submitButton = requestForm.querySelector('.request-submit');
+      submitButton.disabled = true;
+
+      try {
+        const formData = new FormData(requestForm);
+        const payload = {
+          discord_username: formData.get('discord_username'),
+          experience: formData.get('experience'),
+          helper_type: formData.get('helper_type'),
+          goals: formData.get('goals'),
+          availability: formData.get('availability'),
+          context: formData.get('context') || '',
+        };
+
+        const response = await fetch('/api/lesson-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+        const notice = document.createElement('div');
+        notice.className = response.ok ? 'request-notice request-success' : 'request-notice request-error';
+        notice.setAttribute('role', response.ok ? 'status' : 'alert');
+        notice.textContent = response.ok ? 'Your request is on its way. A helper will reach out in Discord.' : (result.error || 'We could not send your request right now.');
+        requestForm.prepend(notice);
+        if (response.ok) requestForm.reset();
+      } catch (error) {
+        const notice = document.createElement('div');
+        notice.className = 'request-notice request-error';
+        notice.setAttribute('role', 'alert');
+        notice.textContent = 'We could not reach the service. Please try again.';
+        requestForm.prepend(notice);
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

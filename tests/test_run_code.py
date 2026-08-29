@@ -55,7 +55,7 @@ class RunCodeEndpointTests(unittest.TestCase):
         self.assertIn("Request a professional lesson", page_html)
 
     def test_discord_page_has_lesson_request_modal(self):
-        response = self.client.get("/templates/discord.html")
+        response = self.client.get("/discord.html")
         page_html = response.get_data(as_text=True)
 
         self.assertEqual(response.status_code, 200)
@@ -72,7 +72,7 @@ class RunCodeEndpointTests(unittest.TestCase):
         response = self.client.get("/request-lesson")
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.headers["Location"], "/templates/discord.html?request=1")
+        self.assertEqual(response.headers["Location"], "/discord.html?request=1")
 
     @patch("urllib.request.urlopen")
     def test_request_lesson_post_renders_discord_modal(self, mock_urlopen):
@@ -99,7 +99,7 @@ class RunCodeEndpointTests(unittest.TestCase):
         mock_urlopen.return_value.__enter__.return_value.status = 204
         app_module.app.config["DISCORD_WEBHOOK_URL"] = "https://discord.test/webhook"
 
-        response = self.client.post("/templates/discord.html", data={
+        response = self.client.post("/discord.html", data={
             "discord_username": "learner",
             "experience": "Beginner",
             "helper_type": "A volunteer helper",
@@ -142,6 +142,11 @@ class RunCodeEndpointTests(unittest.TestCase):
         self.assertEqual(payload["embeds"][0]["title"], "Professional lesson request")
         self.assertEqual(payload["embeds"][0]["fields"][0]["value"], "learner")
         self.assertEqual(payload["embeds"][0]["fields"][3]["value"], "Build a small API")
+
+    def test_template_paths_redirect_to_top_level_pages(self):
+        response = self.client.get("/templates/discord.html")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], "/discord.html")
 
     @patch("urllib.request.urlopen")
     def test_captcha_verification_endpoint_uses_server_secret(self, mock_urlopen):
