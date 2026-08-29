@@ -135,6 +135,13 @@ class RunCodeEndpointTests(unittest.TestCase):
         self.assertTrue(response.get_json()["ok"])
         self.assertNotIn("templates/discord.html", response.get_data(as_text=True))
         mock_urlopen.assert_called_once()
+        webhook_request = mock_urlopen.call_args.args[0]
+        payload = json.loads(webhook_request.data.decode("utf-8"))
+        self.assertEqual(webhook_request.full_url, "https://discord.test/webhook")
+        self.assertEqual(payload["username"], "Python in Practice lesson requests")
+        self.assertEqual(payload["embeds"][0]["title"], "Professional lesson request")
+        self.assertEqual(payload["embeds"][0]["fields"][0]["value"], "learner")
+        self.assertEqual(payload["embeds"][0]["fields"][3]["value"], "Build a small API")
 
     @patch("urllib.request.urlopen")
     def test_captcha_verification_endpoint_uses_server_secret(self, mock_urlopen):
