@@ -17,7 +17,7 @@
   <div class="page-shell">
     <header class="site-header">
       <a class="brand-lockup" href="index.html#top" aria-label="Python in Practice home"><img src="https://www.python.org/static/community_logos/python-logo.png" alt="Python logo"><span>Python in Practice</span></a>
-      <nav class="site-nav" aria-label="Main navigation"><a class="nav-request" href="https://code.pip.abrdns.com/request-lesson">Request lesson</a><a href="index.html#principles">Principles</a><a href="index.html#field-notes">Field notes</a><a href="index.html#contact">Say hello <span aria-hidden="true">↗</span></a></nav>
+      <nav class="site-nav" aria-label="Main navigation"><button class="nav-action nav-request" id="open-request-modal" type="button">Request lesson</button><a href="index.html#principles">Principles</a><a href="index.html#field-notes">Field notes</a><a href="index.html#contact">Say hello <span aria-hidden="true">↗</span></a></nav>
       <div class="account-area"><button class="account-button" id="auth-button" type="button">Log in <span aria-hidden="true">↗</span></button><button class="logout-button" id="logout-button" type="button" hidden>Log out</button><a class="account-button" href="index.html">Home <span aria-hidden="true">↗</span></a></div>
       <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">Menu <span>+</span></button>
     </header>
@@ -33,8 +33,30 @@
         </div>
       </section>
     </main>
+    <dialog class="lesson-modal" id="request-modal" aria-labelledby="request-modal-title">
+      <div class="lesson-dialog">
+        <button class="lesson-close" id="close-request-modal" type="button" aria-label="Close lesson request">×</button>
+        <p class="eyebrow"><span class="eyebrow-dot"></span> Personal guidance</p>
+        <h2 id="request-modal-title">Shape your<br><i>next lesson.</i></h2>
+        <form class="request-form" method="post" action="https://code.pip.abrdns.com/templates/discord.html">
+          <div class="request-field"><label for="request_discord_username">Discord username <span>*</span></label><input id="request_discord_username" name="discord_username" type="text" placeholder="yourname" maxlength="100" required></div>
+          <div class="request-field"><label for="request_experience">How advanced are you in Python development? <span>*</span></label><select id="request_experience" name="experience" required><option value="">Choose your current level</option><option>Just starting</option><option>Beginner</option><option>Intermediate</option><option>Advanced</option><option>Professional developer</option></select></div>
+          <div class="request-field"><label for="request_helper_type">Who would you like help from? <span>*</span></label><select id="request_helper_type" name="helper_type" required><option value="">Choose a helper</option><option>A professional trainer</option><option>A volunteer helper</option><option>The owner</option></select></div>
+          <div class="request-field"><label for="request_goals">What would you like to learn or build? <span>*</span></label><textarea id="request_goals" name="goals" rows="3" maxlength="1000" required></textarea></div>
+          <div class="request-field"><label for="request_availability">When are you usually available? <span>*</span></label><input id="request_availability" name="availability" type="text" maxlength="1000" placeholder="Weekday evenings, UTC-5" required></div>
+          <div class="request-field"><label for="request_context">Anything else that would help us prepare?</label><textarea id="request_context" name="context" rows="2" maxlength="1000"></textarea></div>
+          <button class="request-submit" type="submit">Send lesson request <span aria-hidden="true">↗</span></button>
+        </form>
+      </div>
+    </dialog>
     <footer class="site-footer"><span>© 2026 Python in Practice</span><a href="index.html#top">Back to home ↑</a></footer>
   </div>
+  <script>
+    const requestModal = document.querySelector('#request-modal');
+    document.querySelector('#open-request-modal').addEventListener('click', () => requestModal.showModal());
+    document.querySelector('#close-request-modal').addEventListener('click', () => requestModal.close());
+    requestModal.addEventListener('click', (event) => { if (event.target === requestModal) requestModal.close(); });
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
