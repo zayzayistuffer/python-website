@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Over 1,000 practical Python lessons, from first steps to advanced engineering.">
+  <title>Lessons | Python in Practice</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand-lockup" href="index.html#top" aria-label="Python in Practice home"><img src="https://www.python.org/static/community_logos/python-logo.png" alt="Python logo"><span>Python in Practice</span></a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="workbench.html">Workbench</a>
+        <a href="lessons.html">Lessons</a>
+        <a href="discord.html">Discord</a>
+        <button class="nav-action nav-request" type="button" data-open-request>Request lesson</button>
+        <a href="#principles">Principles</a>
+        <a href="#field-notes">Field notes</a>
+        <a href="#contact">Say hello <span aria-hidden="true">↗</span></a>
+      </nav>
+      <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">Menu <span>+</span></button>
+    </header>
+
+    <main class="lessons-page">
+      <section class="lessons-intro">
+        <div><p class="eyebrow"><span class="eyebrow-dot"></span> The curriculum</p><h1>Learn Python, one lesson at a time.</h1></div>
+        <p class="lessons-intro-copy">Learn Python with 1,152 lessons, from first steps to advanced engineering. If there are any bugs or problems, report them to us in our discord.</p>
+      </section>
+      <section aria-label="Python lesson library">
+        <div class="lesson-toolbar"><input class="lesson-control" id="lesson-search" type="search" placeholder="Search lessons..." aria-label="Search lessons"><select class="lesson-control" id="lesson-level" aria-label="Filter by level"><option value="all">All levels</option><option>Beginner</option><option>Core</option><option>Intermediate</option><option>Advanced</option></select><select class="lesson-control" id="lesson-topic" aria-label="Filter by topic"><option value="all">All topics</option></select></div>
+        <p class="lesson-count" id="lesson-count" aria-live="polite"></p>
+        <div class="lesson-grid" id="lesson-grid"></div>
+        <div class="lesson-pagination" id="lesson-pagination" aria-label="Lesson pages"></div>
+      </section>
+    </main>
+    <div class="lesson-modal" id="lesson-modal" aria-hidden="true">
+      <article class="lesson-dialog" role="dialog" aria-modal="true" aria-labelledby="lesson-modal-title">
+        <button class="lesson-modal-close" id="lesson-modal-close" type="button" aria-label="Close lesson">×</button>
+        <p class="eyebrow" id="lesson-modal-level"></p>
+        <h2 id="lesson-modal-title"></h2>
+        <p class="lesson-modal-detail" id="lesson-modal-detail"></p>
+        <pre class="lesson-example" id="lesson-example"></pre>
+        <label for="lesson-answer">Recreate the example to continue</label>
+        <textarea class="lesson-answer" id="lesson-answer" rows="6" spellcheck="false" placeholder="Write the Python code here..."></textarea>
+        <button class="lesson-check" id="lesson-check" type="button">Check code</button>
+        <p class="lesson-feedback" id="lesson-feedback" role="status"></p>
+        <a class="lesson-start" id="lesson-start" href="workbench.html" aria-disabled="true" tabindex="-1">Continue to the Workbench <span aria-hidden="true">↗</span></a>
+      </article>
+    </div>
+    <footer class="site-footer"><span>© 2026 Python in Practice</span><a href="index.html#top">Back to home ↑</a></footer>
+  </div>
+  <script src="static/lessons.js"></script>
+  <script src="static/lesson-request-inline.js"></script>
+</body>
+</html>
